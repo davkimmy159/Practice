@@ -22,11 +22,22 @@ import com.google.gson.GsonBuilder;
 
 public class JsonPractice {
 
-	private static void initWorkRange(List<String> levels, List<String> turns) {
-		for (char lv = 'A'; lv <= 'L'; lv += 2) {
-			levels.add(String.valueOf(lv));
+	private static void initWorkRange(List<String> levels, List<String> turns, int oddOrEven, int turnStart, int turnEnd) {
+		if (oddOrEven == 1) {
+			for (char lv = 'A'; lv <= 'L'; lv += 2) {
+				levels.add(String.valueOf(lv));
+			}
+		} else if (oddOrEven == 2) {
+			for (char lv = 'B'; lv <= 'L'; lv += 2) {
+				levels.add(String.valueOf(lv));
+			}
+		} else {
+			for (char lv = 'A'; lv <= 'L'; lv++) {
+				levels.add(String.valueOf(lv));
+			}
 		}
-		for (int turn = 1; turn <= 8; turn++) {
+
+		for (int turn = turnStart; turn <= turnStart; turn++) {
 			turns.add(String.valueOf(turn));
 		}
 	}
@@ -77,8 +88,8 @@ public class JsonPractice {
 	}
 
 	/* Voca app json */
-	private static void vocaAppJson() {
-		String workDir = "D:" + File.separator + "work" + File.separator + "work3" + File.separator;
+	private static void vocaAppJson(String workingDir) {
+		String workDir = "D:" + File.separator + "work" + File.separator + workingDir + File.separator;
 		String basePath = (workDir + "result" + File.separator);
 		File excel = new File(workDir + "excel.xlsx");
 
@@ -87,9 +98,10 @@ public class JsonPractice {
 		List<String> turns = new ArrayList<>();
 		Map<String, Map<String, JsonWordList>> outerContainer = new HashMap<>();
 		Map<String, JsonWordList> innerContainer;
+
 		XSSFWorkbook wb = null;
 
-		initWorkRange(levels, turns);
+		initWorkRange(levels, turns, 1, 1, 8);
 		wb = loadExcel(excel);
 
 		for (String level : levels) {
@@ -128,8 +140,7 @@ public class JsonPractice {
 		for (int sheetCnt = 0; sheetCnt < sheetLength; sheetCnt++) {
 			sheet = wb.getSheetAt(sheetCnt);
 
-			int rowTotCnt = sheet.getPhysicalNumberOfRows();
-			for (int rowCnt = 2; rowCnt <= rowTotCnt; rowCnt++) {
+			for (int rowCnt = 2;; rowCnt++) {
 
 				row = sheet.getRow(rowCnt);
 
@@ -281,27 +292,75 @@ public class JsonPractice {
 	}
 
 	/* Handwrite app rhyme json */
-	private static void HandwriteAppRhymeJson() {
-		String workDir = "D:" + File.separator + "work" + File.separator + "work4" + File.separator;
+	private static void HandwriteAppRhymeJson(String workingDir) {
+		String workDir = "D:" + File.separator + "work" + File.separator + workingDir + File.separator;
 		String basePath = (workDir + "result" + File.separator);
-		File excel = new File(workDir + "excel.xlsx");
+		File excel;
 
 		String version = "1.0";
-		List<String> levels = new ArrayList<>();
-		List<String> turns = new ArrayList<>();
-		Map<String, Map<String, JsonWordList>> outerContainer = new HashMap<>();
-		Map<String, JsonWordList> innerContainer;
+		Map<String, Map<String, RhymeList>> outerContainer = new HashMap<>();
+		Map<String, RhymeList> innerContainerA = new HashMap<>();
+		Map<String, RhymeList> innerContainerB = new HashMap<>();
+		RhymeList rhymeList;
+
 		XSSFWorkbook wb = null;
 
-		initWorkRange(levels, turns);
-		wb = loadExcel(excel);
+		for (int turnCnt = 17; turnCnt <= 24; turnCnt++) {
+			rhymeList = new RhymeList("1.0", "A", String.valueOf(turnCnt), 1);
+		}
+		for (int turnCnt = 1; turnCnt <= 24; turnCnt++) {
+			rhymeList = new RhymeList("1.0", "B", String.valueOf(turnCnt), 1);
+		}
+
+		outerContainer.put("A", innerContainerA);
+		outerContainer.put("B", innerContainerB);
+
+		String imgExt = ".png";
+		String voiceExt = ".mp3";
+		XSSFSheet sheet;
+
+		XSSFRow row;
+		String turn;
+		
+		Rhyme rhyme;
+		
+		char level;
+		int sheetStarter;
+		for(char repeat = 'A'; repeat <= 'B'; repeat++) {
+			level = repeat;
+			sheetStarter = repeat == 'A' ? 2 : 0;
+			
+			excel = new File(workDir + "excel_" + Character.toLowerCase(level) + ".xlsx");
+			wb = loadExcel(excel);
+			
+			int sheetLength = wb.getNumberOfSheets();
+			for (; sheetStarter < sheetLength; sheetStarter++) {
+				
+				sheet = wb.getSheetAt(sheetStarter);
+
+				for (int rowCnt = 1;; rowCnt++) {
+					row = sheet.getRow(rowCnt);
+					try {
+						turn = row.getCell(0).getStringCellValue().trim();
+						if(!"".equals(turn)) {
+							turn = turn.substring(turn.indexOf("\n") + 1, turn.indexOf("호"));	
+						}
+					} catch (NullPointerException ex) {
+						// break if no more row
+						break;
+					}
+
+					
+				}
+			}
+		}
 	}
-	
+
 	public static void main(String[] args) {
 		/* Voca app json */
-//		vocaAppJson();
-		
+		// vocaAppJson("work3");
+
 		/* Handwrite app rhyme json */
-		HandwriteAppRhymeJson();
+		HandwriteAppRhymeJson("work4");
 	}
 }
