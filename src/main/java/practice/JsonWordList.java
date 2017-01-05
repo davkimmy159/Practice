@@ -7,6 +7,8 @@ public class JsonWordList {
 	private String version;
 	private String level;
 	private String turn;
+	private String[] turns;
+
 	private List<JsonWord> words;
 	
 	public JsonWordList(String version, String level, String turn) {
@@ -38,6 +40,14 @@ public class JsonWordList {
 
 	public void setTurn(String turn) {
 		this.turn = turn;
+	}
+
+	public String[] getTurns() {
+		return turns;
+	}
+
+	public void setTurns(String[] turns) {
+		this.turns = turns;
 	}
 
 	public List<JsonWord> getWords() {

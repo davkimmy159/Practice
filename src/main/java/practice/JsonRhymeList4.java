@@ -3,16 +3,16 @@ package practice;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RhymeList {
+public class JsonRhymeList4 {
 	private String version;
 	private String level;
 	private String turn;
 	private String[] turns;
 	private String intro_voice;
 	private String intro_voice_check;
-	private List<Rhyme> rhymes;
+	private List<JsonRhyme4> rhymes;
 
-	public RhymeList(String version, String level, String turn, int turns) {
+	public JsonRhymeList4(String version, String level, String turn, int turns) {
 		this.version = version;
 		this.level = level;
 		this.turn = turn;
@@ -69,11 +69,15 @@ public class RhymeList {
 		this.intro_voice_check = intro_voice_check;
 	}
 
-	public List<Rhyme> getRhymes() {
+	public List<JsonRhyme4> getRhymes() {
 		return rhymes;
 	}
 
-	public void setRhymes(List<Rhyme> rhymes) {
+	public void setRhymes(List<JsonRhyme4> rhymes) {
 		this.rhymes = rhymes;
+	}
+	
+	public void addRhyme(JsonRhyme4 jsonRhyme) {
+		rhymes.add(jsonRhyme);
 	}
 }

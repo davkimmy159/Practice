@@ -1,6 +1,6 @@
 package practice;
 
-public class Rhyme {
+public class JsonRhyme3 {
 	private String rhyme;
 	private String rhyme_make_count;
 	private String rhyme_make_1;
@@ -10,6 +10,7 @@ public class Rhyme {
 	private String rhyme_sound_voice;
 	private String rhyme_sound_voice_check;
 	private String words_count;
+	
 	private String word1;
 	private String word1_image;
 	private String word1_image_check;
@@ -17,6 +18,7 @@ public class Rhyme {
 	private String word1_voice_check;
 	private String word1_name_sound_voice;
 	private String word1_name_sound_voice_check;
+	
 	private String word2;
 	private String word2_image;
 	private String word2_image_check;
@@ -24,6 +26,7 @@ public class Rhyme {
 	private String word2_voice_check;
 	private String word2_name_sound_voice;
 	private String word2_name_sound_voice_check;
+	
 	private String word3;
 	private String word3_image;
 	private String word3_image_check;

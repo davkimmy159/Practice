@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -37,7 +36,7 @@ public class JsonPractice {
 			}
 		}
 
-		for (int turn = turnStart; turn <= turnStart; turn++) {
+		for (int turn = turnStart; turn <= turnEnd; turn++) {
 			turns.add(String.valueOf(turn));
 		}
 	}
@@ -56,13 +55,14 @@ public class JsonPractice {
 		return wb;
 	}
 
-	private static void putInList(Map<String, Map<String, JsonWordList>> container, String level, String turn, JsonWord jsonWord) {
+	private static void putInList(Map<String, Map<String, JsonWordList>> container, String version, String level, String turn, String[] turns, JsonWord jsonWord) {
 		JsonWordList jsonWordList = container.get(level).get(turn);
+
 		if (jsonWordList == null) {
-			jsonWordList = new JsonWordList("1.0.0", level, turn);
-			container.get(level).put(turn, jsonWordList);
+			jsonWordList = new JsonWordList(version, level, turn);
 		}
 
+		jsonWordList.setTurns(turns);
 		jsonWordList.addWord(jsonWord);
 	}
 
@@ -118,6 +118,7 @@ public class JsonPractice {
 
 		XSSFRow row;
 		String level;
+		String wordType = null;
 		boolean isDoubleTurn = false;
 		String[] doubleTurn = null;
 		String turn;
@@ -130,7 +131,7 @@ public class JsonPractice {
 		// 파일
 		String image;
 		String voice;
-		String sentenceVoice;
+		String sentenceVoice = null;
 		String sentenceAnswerVoice = null;
 		String imageClsf = null;
 
@@ -171,6 +172,13 @@ public class JsonPractice {
 
 				// word
 				word = row.getCell(2).getStringCellValue().trim();
+
+				// wordType
+				if (!word.contains(" ")) {
+					wordType = String.valueOf(0);
+				} else {
+					wordType = String.valueOf(1);
+				}
 
 				// mean
 				mean = row.getCell(3).getStringCellValue().trim();
@@ -225,7 +233,11 @@ public class JsonPractice {
 				voice = word + voiceExt;
 
 				// sentence_voice;
-				sentenceVoice = level + "_" + turn + "_" + voice;
+				if (isDoubleTurn) {
+					sentenceVoice = level + "_" + doubleTurn[0] + " " + doubleTurn[1] + "_" + voice;
+				} else {
+					sentenceVoice = level + "_" + turn + "_" + voice;
+				}
 
 				// sentence_answer_voice;
 				if (sentenceAnswer != null) {
@@ -235,6 +247,7 @@ public class JsonPractice {
 				// jsonWord
 				jsonWord = new JsonWord();
 				jsonWord.setWord(word);
+				jsonWord.setWordType(wordType);
 				jsonWord.setMean(mean);
 				jsonWord.setSentence(wordSentence);
 				jsonWord.setSentence_mean(meanSentence);
@@ -252,10 +265,10 @@ public class JsonPractice {
 				}
 
 				if (!isDoubleTurn) {
-					putInList(outerContainer, level, turn, jsonWord);
+					putInList(outerContainer, version, level, turn, new String[] { turn }, jsonWord);
 				} else {
 					for (String eachTurn : doubleTurn) {
-						putInList(outerContainer, level, eachTurn, jsonWord);
+						putInList(outerContainer, version, level, eachTurn, doubleTurn, jsonWord);
 					}
 				}
 
@@ -277,12 +290,12 @@ public class JsonPractice {
 					dirs.mkdirs();
 				}
 
-				File file = new File(dirs.getPath() + File.separator + "content.json");
+				File file = new File(dirs.getPath() + File.separator + "contents.json");
 				if (file.exists()) {
 					file.delete();
 				}
 
-				file = new File(dirs.getPath() + File.separator + "content.json");
+				file = new File(dirs.getPath() + File.separator + "contents.json");
 
 				fileWrite(json, file);
 
@@ -298,19 +311,12 @@ public class JsonPractice {
 		File excel;
 
 		String version = "1.0";
-		Map<String, Map<String, RhymeList>> outerContainer = new HashMap<>();
-		Map<String, RhymeList> innerContainerA = new HashMap<>();
-		Map<String, RhymeList> innerContainerB = new HashMap<>();
-		RhymeList rhymeList;
+		Map<String, Map<String, Object>> outerContainer = new HashMap<>();
+		Map<String, Object> innerContainerA = new HashMap<>();
+		Map<String, Object> innerContainerB = new HashMap<>();
+		JsonRhymeList2 jsonRhymeList;
 
 		XSSFWorkbook wb = null;
-
-		for (int turnCnt = 17; turnCnt <= 24; turnCnt++) {
-			rhymeList = new RhymeList("1.0", "A", String.valueOf(turnCnt), 1);
-		}
-		for (int turnCnt = 1; turnCnt <= 24; turnCnt++) {
-			rhymeList = new RhymeList("1.0", "B", String.valueOf(turnCnt), 1);
-		}
 
 		outerContainer.put("A", innerContainerA);
 		outerContainer.put("B", innerContainerB);
@@ -320,45 +326,292 @@ public class JsonPractice {
 		XSSFSheet sheet;
 
 		XSSFRow row;
-		String turn;
+		XSSFRow nextRow;
+		String turn = null;
+		String tmpTurn = null;
+		String tmpNextRowTurn = null;
+		boolean timeToMakeJsonRhyme = false;
+		boolean isWorkRow = false;
+		boolean isRhymeRow = false;
+		String rhymeRowClsf = null;
+		String fileName = null;
+		String content = null;
+		String[] arr = null;
+		String arrStr = null;
+		int currentOrder = 0;
 		
-		Rhyme rhyme;
+
+		String rhyme = null;
+		String rhyme_make_count = "2";
+        String rhyme_make_1 = null;
+        String rhyme_make_2 = null;
+        String rhyme_make_voice = null;
+        String rhyme_sound_voice = null;
+        String words_count = null;
+        String word1 = null;
+        String word1_image = null;
+        String word1_voice = null;
+        String word1_voice_check = null;
+        String word1_name_sound_voice = null;
 		
-		char level;
+        JsonRhyme2 jsonRhyme2 = null;
+        JsonRhyme3 jsonRhyme3 = null;
+        JsonRhyme4 jsonRhyme4 = null;
+        JsonRhyme5 jsonRhyme5 = null;
+        
+        JsonRhymeCommonInfo rhymeCommonInfo = null;
+        JsonRhymeWordInfo jsonRhymeWordInfo = null;
+        
+        List<JsonRhymeCommonInfo> rhymeCommonInfoList = new ArrayList<>(5);
+        List<JsonRhymeWordInfo> wordInfoList = new ArrayList<>(5);
+        for(int i = 0; i < 5; i++) {
+        	rhymeCommonInfoList.add(new JsonRhymeCommonInfo());
+        	wordInfoList.add(new JsonRhymeWordInfo());
+        }
+        
+        
+		String level;
 		int sheetStarter;
-		for(char repeat = 'A'; repeat <= 'B'; repeat++) {
-			level = repeat;
+		for (char repeat = 'A'; repeat <= 'B'; repeat++) {
+			level = String.valueOf(repeat);
 			sheetStarter = repeat == 'A' ? 2 : 0;
-			
-			excel = new File(workDir + "excel_" + Character.toLowerCase(level) + ".xlsx");
+
+			excel = new File(workDir + "excel_" + level.toLowerCase() + ".xlsx");
 			wb = loadExcel(excel);
-			
+
 			int sheetLength = wb.getNumberOfSheets();
+			int totRowCnt;
 			for (; sheetStarter < sheetLength; sheetStarter++) {
 				
 				sheet = wb.getSheetAt(sheetStarter);
-
+				totRowCnt = sheet.getPhysicalNumberOfRows();
 				for (int rowCnt = 1;; rowCnt++) {
 					row = sheet.getRow(rowCnt);
+					nextRow = sheet.getRow(rowCnt + 1);
+
+					// turn
 					try {
-						turn = row.getCell(0).getStringCellValue().trim();
-						if(!"".equals(turn)) {
-							turn = turn.substring(turn.indexOf("\n") + 1, turn.indexOf("호"));	
+						tmpTurn = row.getCell(0).getStringCellValue().trim();
+						if(tmpTurn.contains("23") || tmpTurn.contains("24")) {
+							tmpNextRowTurn = nextRow.getCell(0).getStringCellValue().trim();	
+						}
+						
+						if (turn == null || !(tmpTurn.equals(turn) || "".equals(tmpTurn))) {
+							turn = tmpTurn.substring(tmpTurn.indexOf("\n") + 1, tmpTurn.indexOf("호"));
+							System.out.println("새로운 호 : " + turn);
+							isWorkRow = false;
+							timeToMakeJsonRhyme = false;
+							currentOrder = 0;
+						} else {
+							if (isWorkRow == false) {
+								isWorkRow = true;
+							}
+							
+							if(!"".equals(tmpNextRowTurn)) {
+								timeToMakeJsonRhyme = true;
+							}
+							
+							if((rowCnt + 1) == totRowCnt) {
+								timeToMakeJsonRhyme = true;
+							}
 						}
 					} catch (NullPointerException ex) {
 						// break if no more row
 						break;
 					}
 
-					
+					// rhymeRow
+					if (isWorkRow) {
+						rhymeRowClsf = row.getCell(1).getStringCellValue().trim();
+
+						if (Integer.parseInt(turn) % 2 == 1) {
+							// odd turn
+
+							if (rhymeRowClsf.contains("영상")) {
+								isRhymeRow = true;
+							} else if (rhymeRowClsf.contains("단어")) {
+								isRhymeRow = false;
+							}
+
+							if (isRhymeRow) {
+								// rhyme work
+								currentOrder++;
+								
+								fileName = row.getCell(3).getStringCellValue().trim();
+								content = row.getCell(4).getStringCellValue().trim();
+
+								if(content.contains(")")) {
+									content = content.substring(content.indexOf(')') + 2, content.length());
+								}
+								
+								arr = content.replace(" ", "").split(",");
+								
+								/*
+								for(String arrValue : arr) {
+									System.out.print(arrValue + " ");
+								}
+								System.out.println();
+								*/
+								
+								arrStr = arr[0] + "_" + arr[1] + "_" + arr[2];
+
+								rhyme = arr[2];
+								rhyme_make_count = "2";
+								rhyme_make_1 = arr[0];
+								rhyme_make_2 = arr[1];
+								rhyme_make_voice = level + "_" + turn + "_" + currentOrder + "_" + arrStr + voiceExt;
+								
+								/*
+								System.out.println("rhyme            : " + rhyme);
+								System.out.println("rhyme_make_count : " + rhyme_make_count);
+								System.out.println("rhyme_make_1     : " + rhyme_make_1);
+								System.out.println("rhyme_make_2     : " + rhyme_make_2);
+								System.out.println("rhyme_make_voice : " + rhyme_make_voice);
+								*/
+
+								rhymeCommonInfo = rhymeCommonInfoList.get(currentOrder - 1);
+								rhymeCommonInfo.setRhyme(rhyme);
+								rhymeCommonInfo.setRhyme_make_count(rhyme_make_count);
+								rhymeCommonInfo.setRhyme_make_1(rhyme_make_1);
+								rhymeCommonInfo.setRhyme_make_2(rhyme_make_2);
+								rhymeCommonInfo.setRhyme_make_voice(rhyme_make_voice);
+								
+								/*
+								rhyme_sound_voice;
+								words_count;
+								word1;
+								word1_image;
+								word1_voice;
+								word1_voice_check;
+								word1_name_sound_voice;
+								*/
+							}
+							
+							if (Integer.parseInt(turn) % 2 == 0) {
+								// etc work
+								fileName = row.getCell(3).getStringCellValue().trim();
+								content = row.getCell(4).getStringCellValue().trim();
+								words_count = String.valueOf(currentOrder);
+							}
+						} else {
+							// even turn
+							
+						}
+
+						if(timeToMakeJsonRhyme) {
+							/*
+							System.out.println("words_count : " + currentOrder);
+							System.out.println("cur row cnt : " + (rowCnt + 1));
+							System.out.println("tot row cnt : " + totRowCnt);
+							*/
+							
+							/*
+							JsonRhymeCommonInfo
+					        JsonRhymeWordInfo
+					        rhymeCommonInfoList
+					        wordInfoList
+					        */
+							
+							switch(currentOrder) {
+							case 2:
+								for(JsonRhymeCommonInfo jsonRhymeCommonInfo : rhymeCommonInfoList) {
+									jsonRhyme2 = new JsonRhyme2();
+									jsonRhyme2.setRhyme(rhymeCommonInfo.getRhyme());
+									jsonRhyme2.setRhyme_make_count(rhymeCommonInfo.getRhyme_make_count());
+									jsonRhyme2.setRhyme_make_1(rhymeCommonInfo.getRhyme_make_1());
+									jsonRhyme2.setRhyme_make_2(rhymeCommonInfo.getRhyme_make_2());
+									jsonRhyme2.setRhyme_make_voice(rhymeCommonInfo.getRhyme_make_voice());
+									outerContainer.get(level).get(turn);
+								}
+								
+								break;
+							case 3:
+								
+								jsonRhyme3 = new JsonRhyme3();
+								jsonRhyme3.setRhyme(rhymeCommonInfo.getRhyme());
+								jsonRhyme3.setRhyme_make_count(rhymeCommonInfo.getRhyme_make_count());
+								jsonRhyme3.setRhyme_make_1(rhymeCommonInfo.getRhyme_make_1());
+								jsonRhyme3.setRhyme_make_2(rhymeCommonInfo.getRhyme_make_2());
+								jsonRhyme3.setRhyme_make_voice(rhymeCommonInfo.getRhyme_make_voice());
+								
+								break;
+							case 4:
+								
+								jsonRhyme4 = new JsonRhyme4();
+								jsonRhyme4.setRhyme(rhymeCommonInfo.getRhyme());
+								jsonRhyme4.setRhyme_make_count(rhymeCommonInfo.getRhyme_make_count());
+								jsonRhyme4.setRhyme_make_1(rhymeCommonInfo.getRhyme_make_1());
+								jsonRhyme4.setRhyme_make_2(rhymeCommonInfo.getRhyme_make_2());
+								jsonRhyme4.setRhyme_make_voice(rhymeCommonInfo.getRhyme_make_voice());
+								
+								break;
+							case 5:
+								
+								jsonRhyme5 = new JsonRhyme5();
+								jsonRhyme5.setRhyme(rhymeCommonInfo.getRhyme());
+								jsonRhyme5.setRhyme_make_count(rhymeCommonInfo.getRhyme_make_count());
+								jsonRhyme5.setRhyme_make_1(rhymeCommonInfo.getRhyme_make_1());
+								jsonRhyme5.setRhyme_make_2(rhymeCommonInfo.getRhyme_make_2());
+								jsonRhyme5.setRhyme_make_voice(rhymeCommonInfo.getRhyme_make_voice());
+								
+								break;
+							}
+						}
+						
+//						outerContainer.get(String.valueOf(level)).get(turn).addRhyme(jsonRhyme);
+						
+						
+						for (int turnCnt = 17; turnCnt <= 24; turnCnt++) {
+							jsonRhymeList = new JsonRhymeList2(version, "A", String.valueOf(turnCnt), 1);
+							jsonRhymeList.setTurns(new String[] { String.valueOf(turnCnt) });
+							jsonRhymeList.setIntro_voice("intro" + turnCnt + ".mp3");
+							innerContainerA.put(String.valueOf(turnCnt), jsonRhymeList);
+						}
+						for (int turnCnt = 1; turnCnt <= 24; turnCnt++) {
+							jsonRhymeList = new JsonRhymeList2(version, "B", String.valueOf(turnCnt), 1);
+							jsonRhymeList.setTurns(new String[] { String.valueOf(turnCnt) });
+							jsonRhymeList.setIntro_voice("intro" + turnCnt + ".mp3");
+							innerContainerB.put(String.valueOf(turnCnt), jsonRhymeList);
+						}
+
+					}
 				}
+			}
+		}
+		
+		Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().serializeNulls().create();
+
+		for (String levelKey : outerContainer.keySet()) {
+			for (String turnKey : outerContainer.get(levelKey).keySet()) {
+				String json = gson.toJson(outerContainer.get(levelKey).get(turnKey));
+				json = json.replaceAll("  ", "\t").replaceAll("null", "\"\"");
+
+//				System.out.println(json);
+				
+				/*
+				File dirs = new File(basePath + levelKey + File.separator + turnKey + File.separator);
+				if (!dirs.exists()) {
+					dirs.mkdirs();
+				}
+
+				File file = new File(dirs.getPath() + File.separator + "contents.json");
+				if (file.exists()) {
+					file.delete();
+				}
+				
+				file = new File(dirs.getPath() + File.separator + "contents.json");
+
+				fileWrite(json, file);
+				 
+				System.out.println(file);
+				*/
 			}
 		}
 	}
 
 	public static void main(String[] args) {
 		/* Voca app json */
-		// vocaAppJson("work3");
+//		 vocaAppJson("work3");
 
 		/* Handwrite app rhyme json */
 		HandwriteAppRhymeJson("work4");
