@@ -15,22 +15,23 @@ public class JsonWord {
 	private String sentence_answer;
 	private String sentence_answer_voice;
 	private String sentence_answer_voice_check;
+	private String[] avoid_type1;
 	
 	public JsonWord() {
-		String word = "";
-		String wordType = "";
-		String mean = "";
-		String image = "";
-		String image_size = "";
-		String voice = "";
-		String voice_size = "";
-		String sentence = "";
-		String sentence_mean = "";
-		String sentence_voice = "";
-		String sentence_voice_size = "";
-		String sentence_answer = "";
-		String sentence_answer_voice = "";
-		String sentence_answer_voice_check = "";
+		word = "";
+		wordType = "";
+		mean = "";
+		image = "";
+		image_size = "";
+		voice = "";
+		voice_size = "";
+		sentence = "";
+		sentence_mean = "";
+		sentence_voice = "";
+		sentence_voice_size = "";
+		sentence_answer = "";
+		sentence_answer_voice = "";
+		sentence_answer_voice_check = "";
 	}
 
 	public String getWord() {
@@ -143,5 +144,13 @@ public class JsonWord {
 
 	public void setSentence_answer_voice_check(String sentence_answer_voice_check) {
 		this.sentence_answer_voice_check = sentence_answer_voice_check;
+	}
+
+	public String[] getAvoid_type1() {
+		return avoid_type1;
+	}
+
+	public void setAvoid_type1(String[] avoid_type1) {
+		this.avoid_type1 = avoid_type1;
 	}
 }
