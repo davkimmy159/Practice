@@ -171,14 +171,11 @@ public class JsonPractice {
 		return outerContainer;
 	}
 	
-	private static void insertSightword() {
-		
-	}
-	
 	/* Voca app json */
-	private static void vocaAppJson(String workingDir, String excelName, int interval, char lvStart, int turnStart, int turnEnd, boolean isWithNewField, int avoidTypeColumn) {
+	private static void vocaAppJson(String workingDir, String excelName, int interval, char lvStart, int turnStart, int turnEnd) {
 		String workPath = "D:" + File.separator + "work" + File.separator + workingDir + File.separator;
-		String basePath = (workPath + "result" + File.separator);
+		String basePath = workPath + "result" + File.separator;
+		String jsonPath = workPath + "json_result" + File.separator;
 		File excel = new File(workPath + excelName);
 
 		String version = "1.0";
@@ -203,7 +200,6 @@ public class JsonPractice {
 				} else {
 					innerContainer.put(turn, new JsonWordList(version, level, turn));
 				}
-
 			}
 			outerContainer.put(level, innerContainer);
 		}
@@ -226,11 +222,16 @@ public class JsonPractice {
 		String sentenceAnswer = null;
 		String[] avoidType1 = null;
 		String avoidType1Str = null;
-
+		String capWord = null;
+		char behindChar;
+		int sentenceLength = 0;
+		
 		// 파일
-		String image;
-		String voice;
+		String image = null;
+		String voice = null;
+		String voiceClsf = null;
 		String sentenceVoice = null;
+		String sentenceVoiceClsf = null;
 		String sentenceAnswerVoice = null;
 		String imageClsf = null;
 
@@ -247,7 +248,7 @@ public class JsonPractice {
 
 				// deleted words
 				try {
-					deleted = row.getCell(8).getStringCellValue().trim();
+					deleted = row.getCell(10).getStringCellValue().trim();
 				} catch (NullPointerException ex) {
 					
 				}
@@ -302,67 +303,92 @@ public class JsonPractice {
 
 				if (wordSentence.contains("(")) {
 					sentenceAnswer = wordSentence.substring(wordSentence.indexOf("(") + 1, wordSentence.indexOf(")"));
-				}
-
-				if (wordSentence.contains(word)) {
-					wordSentence = wordSentence.replace(word, "(" + word + ")");
 				} else {
-					String capWord = StringUtils.capitalize(word);
+					capWord = StringUtils.capitalize(word);
 					if (wordSentence.contains(capWord)) {
 						wordSentence = wordSentence.replace(capWord, "(" + capWord + ")");
+					} else if (wordSentence.contains(word)) {
+						wordSentence = wordSentence.replace(word, "(" + word + ")");
 					}
 				}
 
+				/*
+				behindChar = wordSentence.charAt(wordSentence.indexOf(word) + word.length());
+				if(behindChar == 'i' || behindChar == 'e'|| behindChar == 's') {
+					System.out.println(word + " : " + wordSentence);
+				}
+				*/
+				
+				
 				meanSentence = row.getCell(5).getStringCellValue().trim();
 
 				// image
 				try {
-					imageClsf = row.getCell(6).getStringCellValue().trim();
+					imageClsf = row.getCell(8).getStringCellValue().trim();
 				} catch (IllegalStateException | NumberFormatException ex) {
-					imageClsf = String.valueOf((int) (row.getCell(6).getNumericCellValue())).trim();
+					imageClsf = String.valueOf((int) (row.getCell(8).getNumericCellValue())).trim();
 				} catch (NullPointerException ex) {
-					break;
 				}
 
 				if ("1".equals(imageClsf) || "2".equals(imageClsf) || "3".equals(imageClsf)) {
+					// image file name with number at end
 					image = word + imageClsf;
 				} else if ("0".equals(imageClsf)) {
+					// no difference from word name
 					image = word;
 				} else {
+					// totally different image file name
 					image = imageClsf;
 				}
 
 				image += imgExt;
 
 				// voice
-				voice = word + voiceExt;
-
-				// sentence_voice;
-				if (isDoubleTurn) {
-					sentenceVoice = level + "_" + doubleTurn[0] + " " + doubleTurn[1] + "_" + voice;
-				} else {
-					sentenceVoice = level + "_" + turn + "_" + voice;
+				try {
+					voiceClsf = row.getCell(6).getStringCellValue().trim();
+				} catch (NullPointerException ex) {
+					
 				}
-
+				if(voiceClsf == null || "".equals(voiceClsf)) {
+					voice = word + voiceExt;	
+				} else {
+					voice = voiceClsf + voiceExt;
+				}
+				
+				// sentence_voice;
+				try {
+					sentenceVoiceClsf = row.getCell(7).getStringCellValue().trim();
+				} catch (NullPointerException ex) {
+				}
+				if(sentenceVoiceClsf == null || "".equals(sentenceVoiceClsf)) {
+					if (isDoubleTurn) {
+						sentenceVoice = level + "_" + doubleTurn[0] + " " + doubleTurn[1] + "_" + voice;
+					} else {
+						sentenceVoice = level + "_" + turn + "_" + voice;
+					}
+				} else {
+					if (isDoubleTurn) {
+						sentenceVoice = level + "_" + doubleTurn[0] + " " + doubleTurn[1] + "_" + sentenceVoiceClsf + voiceExt;
+					} else {
+						sentenceVoice = level + "_" + turn + "_" + sentenceVoiceClsf + voiceExt;
+					}
+				}
+				
 				// sentence_answer_voice;
 				if (sentenceAnswer != null) {
 					sentenceAnswerVoice = sentenceAnswer + voiceExt;
 				}
 
 				// avoidType1
-				if (isWithNewField) {
-					if (!"A".equals(level) && !"B".equals(level)) {
-						try {
-							avoidType1Str = row.getCell(avoidTypeColumn).getStringCellValue().trim();
-						} catch (NullPointerException ex) {
-						}
-
-						if (!(avoidType1Str == null || "".equals(avoidType1Str))) {
-							avoidType1 = avoidType1Str.split(",");
-							for (int avoidTypeCnt = 0; avoidTypeCnt < avoidType1.length; avoidTypeCnt++) {
-								avoidType1[avoidTypeCnt] = avoidType1[avoidTypeCnt].trim();
-							}
-						}
+				try {
+					avoidType1Str = row.getCell(11).getStringCellValue().trim();
+				} catch (NullPointerException ex) {
+				}
+				if (avoidType1Str != null && !"".equals(avoidType1Str)) {
+					System.out.println(level + " : " + turn + " : " + avoidType1Str);
+					avoidType1 = avoidType1Str.split(",");
+					for (int avoidTypeCnt = 0; avoidTypeCnt < avoidType1.length; avoidTypeCnt++) {
+						avoidType1[avoidTypeCnt] = avoidType1[avoidTypeCnt].trim();
 					}
 				}
 
@@ -378,9 +404,7 @@ public class JsonPractice {
 				jsonWord.setVoice(voice);
 				jsonWord.setSentence_voice(sentenceVoice);
 
-				if (isWithNewField) {
-					jsonWord.setAvoid_type1(avoidType1);
-				}
+				jsonWord.setAvoid_type1(avoidType1);
 
 				if (sentenceAnswer != null) {
 					jsonWord.setSentence_answer_voice(sentenceAnswerVoice);
@@ -403,6 +427,8 @@ public class JsonPractice {
 				// empty variable for next loop
 				isDoubleTurn = false;
 				sentenceAnswer = null;
+				avoidType1Str = null;
+				avoidType1 = null;
 			}
 		}
 
@@ -424,35 +450,51 @@ public class JsonPractice {
 		
 		Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().serializeNulls().create();
 		String json; 
-		File dirs;
-		File file;
+		File dirs1;
+		File dirs2;
+		File file1;
+		File file2;
+		String dirName;
 		for (String levelKey : outerContainer.keySet()) {
 			for (String turnKey : outerContainer.get(levelKey).keySet()) {
 				json = gson.toJson(outerContainer.get(levelKey).get(turnKey));
 				json = json.replaceAll("  ", "\t").replaceAll("null", "\"\"");
 
-				dirs = new File(basePath + levelKey + File.separator + turnKey + File.separator);
-				if (!dirs.exists()) {
-					dirs.mkdirs();
+				dirName = "g_" + levelKey.toLowerCase() + "_" + turnKey;
+				
+				dirs1 = new File(basePath + levelKey.toLowerCase() + File.separator + dirName + File.separator);
+				if (!dirs1.exists()) {
+					dirs1.mkdirs();
 				}
 
-				file = new File(dirs.getPath() + File.separator + "contents.json");
-				if (file.exists()) {
-					file.delete();
+				dirs2 = new File(jsonPath + dirName + File.separator);
+				if (!dirs2.exists()) {
+					dirs2.mkdirs();
 				}
-
-				file = new File(dirs.getPath() + File.separator + "contents.json");
-				fileWrite(json, file);
-
-				System.out.println(file);
+				
+				file1 = new File(dirs1.getPath() + File.separator + "contents.json");
+				if (file1.exists()) {
+					file1.delete();
+				}
+				file1 = new File(dirs1.getPath() + File.separator + "contents.json");
+				
+				file2 = new File(dirs2.getPath() + File.separator + "contents.json");
+				if (file2.exists()) {
+					file2.delete();
+				}
+				file2 = new File(dirs2.getPath() + File.separator + "contents.json");
+				
+				fileWrite(json, file1);
+				fileWrite(json, file2);
+				System.out.println(file1);
 			}
 		}
 	}
 	
 	public static void main(String[] args) {
 		/* Voca app json */
-		vocaAppJson("work3", "excel1_8.xlsx", 2, 'A', 1, 8, false, 0);
+		vocaAppJson("work3", "excel1_8.xlsx", 2, 'A', 1, 8);
 
-//		vocaAppJson("work3", "excel9_16.xlsx", 2, 'A', 9, 16, true, 9);
+//		vocaAppJson("work3", "excel9_16.xlsx", 2, 'A', 9, 16);
 	}
 }

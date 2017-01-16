@@ -5,33 +5,37 @@ public class JsonWord {
 	private String wordType;
 	private String mean;
 	private String image;
-	private String image_size;
+	private String image_check;
 	private String voice;
-	private String voice_size;
+	private String voice_check;
 	private String sentence;
 	private String sentence_mean;
 	private String sentence_voice;
-	private String sentence_voice_size;
+	private String sentence_voice_check;
 	private String sentence_answer;
 	private String sentence_answer_voice;
 	private String sentence_answer_voice_check;
 	private String[] avoid_type1;
+	private String train_number;
+	private String start_margin;
 	
 	public JsonWord() {
 		word = "";
 		wordType = "";
 		mean = "";
 		image = "";
-		image_size = "";
+		image_check = "";
 		voice = "";
-		voice_size = "";
+		voice_check = "";
 		sentence = "";
 		sentence_mean = "";
 		sentence_voice = "";
-		sentence_voice_size = "";
+		sentence_voice_check = "";
 		sentence_answer = "";
 		sentence_answer_voice = "";
 		sentence_answer_voice_check = "";
+		train_number = "";
+		start_margin = "";
 	}
 
 	public String getWord() {
@@ -66,12 +70,12 @@ public class JsonWord {
 		this.image = image;
 	}
 
-	public String getImage_size() {
-		return image_size;
+	public String getImage_check() {
+		return image_check;
 	}
 
-	public void setImage_size(String image_size) {
-		this.image_size = image_size;
+	public void setImage_check(String image_check) {
+		this.image_check = image_check;
 	}
 
 	public String getVoice() {
@@ -82,12 +86,12 @@ public class JsonWord {
 		this.voice = voice;
 	}
 
-	public String getVoice_size() {
-		return voice_size;
+	public String getVoice_check() {
+		return voice_check;
 	}
 
-	public void setVoice_size(String voice_size) {
-		this.voice_size = voice_size;
+	public void setVoice_check(String voice_check) {
+		this.voice_check = voice_check;
 	}
 
 	public String getSentence() {
@@ -114,12 +118,12 @@ public class JsonWord {
 		this.sentence_voice = sentence_voice;
 	}
 
-	public String getSentence_voice_size() {
-		return sentence_voice_size;
+	public String getSentence_voice_check() {
+		return sentence_voice_check;
 	}
 
-	public void setSentence_voice_size(String sentence_voice_size) {
-		this.sentence_voice_size = sentence_voice_size;
+	public void setSentence_voice_check(String sentence_voice_check) {
+		this.sentence_voice_check = sentence_voice_check;
 	}
 
 	public String getSentence_answer() {
@@ -152,5 +156,21 @@ public class JsonWord {
 
 	public void setAvoid_type1(String[] avoid_type1) {
 		this.avoid_type1 = avoid_type1;
+	}
+
+	public String getTrain_number() {
+		return train_number;
+	}
+
+	public void setTrain_number(String train_number) {
+		this.train_number = train_number;
+	}
+
+	public String getStart_margin() {
+		return start_margin;
+	}
+
+	public void setStart_margin(String start_margin) {
+		this.start_margin = start_margin;
 	}
 }
