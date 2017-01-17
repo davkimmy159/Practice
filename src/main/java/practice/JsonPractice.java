@@ -319,9 +319,13 @@ public class JsonPractice {
 				}
 				*/
 				
-				
 				meanSentence = row.getCell(5).getStringCellValue().trim();
-
+				
+				if(wordSentence.contains("\"")) {
+					System.out.println(level + " : " + turn + " : " + word + " : " + wordSentence + " : " + wordSentence.indexOf("\""));
+					
+				}
+				
 				// image
 				try {
 					imageClsf = row.getCell(8).getStringCellValue().trim();
@@ -385,7 +389,7 @@ public class JsonPractice {
 				} catch (NullPointerException ex) {
 				}
 				if (avoidType1Str != null && !"".equals(avoidType1Str)) {
-					System.out.println(level + " : " + turn + " : " + avoidType1Str);
+//					System.out.println(level + " : " + turn + " : " + avoidType1Str);
 					avoidType1 = avoidType1Str.split(",");
 					for (int avoidTypeCnt = 0; avoidTypeCnt < avoidType1.length; avoidTypeCnt++) {
 						avoidType1[avoidTypeCnt] = avoidType1[avoidTypeCnt].trim();
@@ -484,9 +488,9 @@ public class JsonPractice {
 				}
 				file2 = new File(dirs2.getPath() + File.separator + "contents.json");
 				
-				fileWrite(json, file1);
-				fileWrite(json, file2);
-				System.out.println(file1);
+//				fileWrite(json, file1);
+//				fileWrite(json, file2);
+//				System.out.println(file1);
 			}
 		}
 	}
