@@ -59,16 +59,6 @@ public class BasicCondition {
 		
 	}
 
-	public static ConditionBuilder getBuilder() {
-		if (builder == null) {
-			synchronized (lock) {
-				if (builder == null)
-					builder = new ConditionBuilder();
-			}
-		}
-		return builder;
-	}
-
 	@EqualsAndHashCode
 	@ToString
 	@NoArgsConstructor
@@ -168,5 +158,15 @@ public class BasicCondition {
 				turns.add(String.valueOf(turn));
 			}
 		}
+	}
+	
+	public static ConditionBuilder getBuilder() {
+		if (builder == null) {
+			synchronized (lock) {
+				if (builder == null)
+					builder = new ConditionBuilder();
+			}
+		}
+		return builder;
 	}
 }

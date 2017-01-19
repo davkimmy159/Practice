@@ -52,13 +52,13 @@ public class JsonWordList {
 		}
 		
 		if(found) {
+//			System.out.println(level + " : " + turn);
+//			System.out.println(wordCntStds);
+//			System.out.println(values);
+
 			wordLocInfo = innerContainer.get(wordTotCnt);
 			wordCntStds = wordLocInfo.getWordStd();
 			values = wordLocInfo.getValues();
-			
-//			System.out.println(level + " : " + turn);			
-//			System.out.println(wordCntStds);
-//			System.out.println(values);
 			
 			for(int cnt = 0; cnt < wordCntStds.size(); cnt++) {
 				eachWordStd = wordCntStds.get(cnt);

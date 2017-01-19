@@ -16,17 +16,6 @@ import com.google.gson.GsonBuilder;
 
 public class JsonPractice {
 
-	private static void putInList(Map<String, Map<String, JsonWordList>> container, String version, String level, String turn, String[] turns, JsonWord jsonWord) {
-		JsonWordList jsonWordList = container.get(level).get(turn);
-
-		if (jsonWordList == null) {
-			jsonWordList = new JsonWordList(version, level, turn);
-		}
-
-		jsonWordList.setTurns(turns);
-		jsonWordList.addWord(jsonWord);
-	}
-
 	private static Sightword makeSightword(XSSFRow row, int wordRow, int meanRow, String voiceExt) {
 		String word;
 		String sightwordVoice;
@@ -193,18 +182,6 @@ public class JsonPractice {
 		XSSFWorkbook wb = null;
 		wb = Util.loadExcel(excelPath);
 		
-		for (String level : levels) {
-			innerContainer = new HashMap<>();
-			for (String turn : turns) {
-				if ("A".equals(level) || "B".equals(level)) {
-					innerContainer.put(turn, new JsonWordListWithSightword(version, level, turn));
-				} else {
-					innerContainer.put(turn, new JsonWordList(version, level, turn));
-				}
-			}
-			outerContainer.put(level, innerContainer);
-		}
-
 		String imgExt = ".png";
 		String voiceExt = ".mp3";
 		XSSFSheet sheet;
@@ -215,7 +192,7 @@ public class JsonPractice {
 		String wordType = null;
 		boolean isDoubleTurn = false;
 		String[] doubleTurn = null;
-		String turn;
+		String turn = null;
 		String word;
 		String mean;
 		String wordSentence;
@@ -241,6 +218,8 @@ public class JsonPractice {
 		for (int sheetCnt = 0; sheetCnt < sheetLength; sheetCnt++) {
 			sheet = wb.getSheetAt(sheetCnt);
 
+			System.out.println(sheet.getSheetName().trim());
+			
 			for (int rowCnt = 1;; rowCnt++) {
 
 				row = sheet.getRow(rowCnt);
@@ -269,7 +248,6 @@ public class JsonPractice {
 				} catch (IllegalStateException | NumberFormatException ex) {
 					turn = String.valueOf((int) (row.getCell(1).getNumericCellValue())).trim();
 				} catch (NullPointerException ex) {
-					break;
 				}
 
 				if ("".equals(turn)) {
@@ -408,26 +386,22 @@ public class JsonPractice {
 				jsonWord.setImage(image);
 				jsonWord.setVoice(voice);
 				jsonWord.setSentence_voice(sentenceVoice);
-
 				jsonWord.setAvoid_type1(avoidType1);
 
 				if (sentenceAnswer != null) {
+					jsonWord.setSentence_answer(sentenceAnswer);
 					jsonWord.setSentence_answer_voice(sentenceAnswerVoice);
 				}
 
-				if (sentenceAnswer != null) {
-					jsonWord.setSentence_answer(sentenceAnswer);
-				}
-
 				if (!isDoubleTurn) {
-					putInList(outerContainer, version, level, turn, new String[] { turn }, jsonWord);
+					jsonWord.putInList(outerContainer, version, level, turn, new String[] { turn });
 				} else {
 					for (String eachTurn : doubleTurn) {
-						putInList(outerContainer, version, level, eachTurn, doubleTurn, jsonWord);
+						jsonWord.putInList(outerContainer, version, level, eachTurn, doubleTurn);
 					}
 				}
 
-//				 System.out.println(rowCnt + " : " + level + " : " + turn + " : " + word + " -----");
+				 System.out.println(rowCnt + " : " + level + " : " + turn + " : " + word);
 				 
 				// empty variable for next loop
 				level = null;
@@ -469,7 +443,10 @@ public class JsonPractice {
 			}
 		}
 		
-		Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().serializeNulls().create();
+		Gson gson = new GsonBuilder().disableHtmlEscaping()
+									 .setPrettyPrinting()
+									 .serializeNulls()
+									 .create();
 		String json; 
 		File dirs1;
 		File dirs2;
@@ -523,7 +500,7 @@ public class JsonPractice {
 											.setLvStart('A')
 											.setTurnRange(1, 8)
 											.setVersion("1.0")
-//											.setJsonFileOutput(true)
+											.setJsonFileOutput(true)
 											.build();
 		
 		BasicCondition con2 = BasicCondition.getBuilder()
