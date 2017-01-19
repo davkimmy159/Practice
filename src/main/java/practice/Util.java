@@ -10,6 +10,12 @@ import java.io.IOException;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class Util {
+	public static final String VOICE_EXT = ".mp3";
+	public static final String IMG_EXT = ".png";
+	
+	private Util() {
+	}
+	
 	public static String makeBasicDirPath(String...paths) {
 		String resultPath = "";
 		for(String path : paths) {

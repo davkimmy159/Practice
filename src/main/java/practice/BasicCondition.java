@@ -16,7 +16,8 @@ import lombok.ToString;
 public class BasicCondition {
 	private String workingDir;
 	private String wordExcelName;
-	private String locInfoExcel;
+	private String sightwordExcelName;
+	private String locInfoExcelName;
 	private int interval;
 	private char lvStart;
 	private int turnStart;
@@ -33,7 +34,8 @@ public class BasicCondition {
 	private BasicCondition(ConditionBuilder builder) {
 		this.workingDir = builder.workingDir;
 		this.wordExcelName = builder.wordExcelName;
-		this.locInfoExcel = builder.locInfoExcel;
+		this.sightwordExcelName = builder.sightwordExcelName;
+		this.locInfoExcelName = builder.locInfoExcelName;
 		this.interval = builder.interval;
 		this.lvStart = builder.lvStart;
 		this.turnStart = builder.turnStart;
@@ -46,7 +48,7 @@ public class BasicCondition {
 		
 		builder.workingDir = null;
 		builder.wordExcelName = null;
-		builder.locInfoExcel = null;
+		builder.locInfoExcelName = null;
 		builder.interval = 0;
 		builder.lvStart = 0;
 		builder.turnStart = 0;
@@ -56,12 +58,10 @@ public class BasicCondition {
 		
 		builder.levels = null;
 		builder.turns = null;
-		
 	}
 
 	@EqualsAndHashCode
 	@ToString
-	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class ConditionBuilder {
 		@Getter
@@ -69,7 +69,9 @@ public class BasicCondition {
 		@Getter
 		private String wordExcelName;
 		@Getter
-		private String locInfoExcel;
+		private String sightwordExcelName;
+		@Getter
+		private String locInfoExcelName;
 		@Getter
 		private int interval;
 		@Getter
@@ -88,6 +90,9 @@ public class BasicCondition {
 		@Getter
 		private List<String> turns;
 		
+		private ConditionBuilder() {
+		}
+		
 		public BasicCondition build() {
 			builder.setLevels();
 			builder.setTurns();
@@ -104,8 +109,13 @@ public class BasicCondition {
 			return builder;
 		}
 
-		public ConditionBuilder setLocInfoExcel(String locInfoExcel) {
-			this.locInfoExcel = locInfoExcel;
+		public ConditionBuilder setSightwordExcelName(String sightwordExcelName) {
+			this.sightwordExcelName = sightwordExcelName;
+			return builder;
+		}
+		
+		public ConditionBuilder setLocInfoExcelName(String locInfoExcelName) {
+			this.locInfoExcelName = locInfoExcelName;
 			return builder;
 		}
 

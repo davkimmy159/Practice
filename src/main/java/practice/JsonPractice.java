@@ -16,94 +16,6 @@ import com.google.gson.GsonBuilder;
 
 public class JsonPractice {
 
-	private static Sightword makeSightword(XSSFRow row, int wordRow, int meanRow, String voiceExt) {
-		String word;
-		String sightwordVoice;
-		String sightwordMean;
-		
-		word = row.getCell(wordRow).getStringCellValue().trim();
-		sightwordVoice = word + voiceExt;
-		sightwordMean = row.getCell(meanRow).getStringCellValue().trim();
-		
-		Sightword sightword = new Sightword();
-		sightword.setSightword(word);
-		sightword.setSightword_voice(sightwordVoice);
-		sightword.setSightword_mean(sightwordMean);
-		
-		return sightword;
-	}
-	
-	private static Map<String, Map<String, List<Sightword>>> sightwordWork(String workPath) {
-		String excelPath = workPath + "excel_sightword.xlsx";
-		
-		Map<String, Map<String, List<Sightword>>> outerContainer = new HashMap<>();
-		Map<String, List<Sightword>> innerContainerA = new HashMap<>();
-		Map<String, List<Sightword>> innerContainerB = new HashMap<>();
-
-		outerContainer.put("A", innerContainerA);
-		outerContainer.put("B", innerContainerB);
-		
-		XSSFWorkbook wb = null;
-		wb = Util.loadExcel(excelPath);
-
-		XSSFSheet sheet;
-		XSSFRow row;
-
-		String voiceExt = ".mp3";
-
-		String turn = null;
-		String tmpTurn = null;
-		Sightword sightword;
-		
-		int wordRow = 1;
-		int meanRow = 2;
-		
-		List<Sightword> list;
-		
-		sheet = wb.getSheetAt(0);
-		
-		for (int rowCnt = 2;; rowCnt++) {
-
-			row = sheet.getRow(rowCnt);
-
-			// turn
-			try {
-				tmpTurn = row.getCell(0).getStringCellValue().trim();
-			} catch (IllegalStateException | NumberFormatException ex) {
-				tmpTurn = String.valueOf((int) (row.getCell(0).getNumericCellValue())).trim();
-			} catch (NullPointerException ex) {
-				break;
-			}
-			
-			if(!"".equals(tmpTurn)) {
-				turn = tmpTurn;
-			}
-			
-			// A
-			sightword = makeSightword(row, wordRow, meanRow, voiceExt);
-			
-			list = innerContainerA.get(turn);
-			if(list == null) {
-				list = new ArrayList<>();
-				innerContainerA.put(turn, list);
-			}
-			list.add(sightword);
-			
-			// B
-			sightword = makeSightword(row, wordRow + 2, meanRow + 2, voiceExt);
-			list = innerContainerB.get(turn);
-			if(list == null) {
-				list = new ArrayList<>();
-				innerContainerB.put(turn, list);
-			}
-			list.add(sightword);
-			
-			list = null;
-		}
-		
-		return outerContainer;
-	}
-
 	public static Map<String, Map<Integer, WordLocInfo>> initWordInfoLoc(String workPath, String excelName) {
 		String excelPath = workPath + excelName;
 		XSSFWorkbook wb = Util.loadExcel(excelPath);
@@ -171,19 +83,15 @@ public class JsonPractice {
 		String excelPath = workPath + basicCondition.getWordExcelName();
 
 		String version = basicCondition.getVersion();
-		List<String> levels = basicCondition.getLevels();
-		List<String> turns = basicCondition.getTurns();
 		Map<String, Map<String, JsonWordList>> outerContainer = new HashMap<>();
 		Map<String, JsonWordList> innerContainer;
 
 		Map<String, Map<String, List<Sightword>>> sightwordContainer;
-		sightwordContainer = sightwordWork(workPath);
+		sightwordContainer = Sightword.getSightwordContainer(workPath, basicCondition.getSightwordExcelName());
 		
 		XSSFWorkbook wb = null;
 		wb = Util.loadExcel(excelPath);
 		
-		String imgExt = ".png";
-		String voiceExt = ".mp3";
 		XSSFSheet sheet;
 
 		XSSFRow row;
@@ -214,11 +122,13 @@ public class JsonPractice {
 		JsonWord jsonWord;
 		JsonWordListWithSightword wordListWithSt;
 
-		int sheetLength = wb.getNumberOfSheets();
-		for (int sheetCnt = 0; sheetCnt < sheetLength; sheetCnt++) {
-			sheet = wb.getSheetAt(sheetCnt);
+		for (char lvCnt = 'A'; lvCnt <= 'L'; lvCnt++) {
+			level = String.valueOf(lvCnt);
+			sheet = wb.getSheet(level);
 
-			System.out.println(sheet.getSheetName().trim());
+			if(sheet == null) {
+				continue;
+			}
 			
 			for (int rowCnt = 1;; rowCnt++) {
 
@@ -228,26 +138,19 @@ public class JsonPractice {
 				try {
 					deleted = row.getCell(10).getStringCellValue().trim();
 				} catch (NullPointerException ex) {
-					
 				}
 				if (deleted != null && deleted.contains("삭제")) {
 					continue;
 				}
 				
-				// level
-				try {
-					level = row.getCell(0).getStringCellValue().trim();
-				} catch (NullPointerException ex) {
-					// break if no more row
-					break;
-				}
-
 				// turn
 				try {
 					turn = row.getCell(1).getStringCellValue().trim();
 				} catch (IllegalStateException | NumberFormatException ex) {
 					turn = String.valueOf((int) (row.getCell(1).getNumericCellValue())).trim();
 				} catch (NullPointerException ex) {
+					// break if no more row
+					break;
 				}
 
 				if ("".equals(turn)) {
@@ -256,10 +159,7 @@ public class JsonPractice {
 
 				if (turn.contains(",")) {
 					isDoubleTurn = true;
-					doubleTurn = turn.split(",");
-					for (int turnCnt = 0; turnCnt < doubleTurn.length; turnCnt++) {
-						doubleTurn[turnCnt] = doubleTurn[turnCnt].trim();
-					}
+					doubleTurn = turn.replace(" ", "").split(",");
 				}
 
 				// word
@@ -289,22 +189,7 @@ public class JsonPractice {
 					}
 				}
 
-				/*
-				behindChar = wordSentence.charAt(wordSentence.indexOf(word) + word.length());
-				if(behindChar == 'i' || behindChar == 'e'|| behindChar == 's') {
-					System.out.println(word + " : " + wordSentence);
-				}
-				*/
-				
 				meanSentence = row.getCell(5).getStringCellValue().trim();
-				
-				// checks double quote in sentence
-				/*
-				if(wordSentence.contains("\"")) {
-					System.out.println(level + " : " + turn + " : " + word + " : " + wordSentence + " : " + wordSentence.indexOf("\""));
-					
-				}
-				*/
 				
 				// image
 				try {
@@ -325,7 +210,7 @@ public class JsonPractice {
 					image = imageClsf;
 				}
 
-				image += imgExt;
+				image += Util.IMG_EXT;
 
 				// voice
 				try {
@@ -334,9 +219,9 @@ public class JsonPractice {
 					
 				}
 				if(null == voiceClsf || "".equals(voiceClsf)) {
-					voice = word + voiceExt;	
+					voice = word + Util.VOICE_EXT;	
 				} else {
-					voice = voiceClsf + voiceExt;
+					voice = voiceClsf + Util.VOICE_EXT;
 				}
 				
 				// sentence_voice;
@@ -352,15 +237,15 @@ public class JsonPractice {
 					}
 				} else {
 					if (isDoubleTurn) {
-						sentenceVoice = level + "_" + doubleTurn[0] + " " + doubleTurn[1] + "_" + sentenceVoiceClsf + voiceExt;
+						sentenceVoice = level + "_" + doubleTurn[0] + " " + doubleTurn[1] + "_" + sentenceVoiceClsf + Util.VOICE_EXT;
 					} else {
-						sentenceVoice = level + "_" + turn + "_" + sentenceVoiceClsf + voiceExt;
+						sentenceVoice = level + "_" + turn + "_" + sentenceVoiceClsf + Util.VOICE_EXT;
 					}
 				}
 				
 				// sentence_answer_voice;
 				if (sentenceAnswer != null) {
-					sentenceAnswerVoice = sentenceAnswer + voiceExt;
+					sentenceAnswerVoice = sentenceAnswer + Util.VOICE_EXT;
 				}
 
 				// avoidType1
@@ -377,35 +262,28 @@ public class JsonPractice {
 				}
 
 				// jsonWord
-				jsonWord = new JsonWord();
-				jsonWord.setWord(word);
-				jsonWord.setWordType(wordType);
-				jsonWord.setMean(mean);
-				jsonWord.setSentence(wordSentence);
-				jsonWord.setSentence_mean(meanSentence);
-				jsonWord.setImage(image);
-				jsonWord.setVoice(voice);
-				jsonWord.setSentence_voice(sentenceVoice);
-				jsonWord.setAvoid_type1(avoidType1);
-
-				if (sentenceAnswer != null) {
-					jsonWord.setSentence_answer(sentenceAnswer);
-					jsonWord.setSentence_answer_voice(sentenceAnswerVoice);
-				}
-
-				if (!isDoubleTurn) {
-					jsonWord.putInList(outerContainer, version, level, turn, new String[] { turn });
-				} else {
-					for (String eachTurn : doubleTurn) {
-						jsonWord.putInList(outerContainer, version, level, eachTurn, doubleTurn);
-					}
-				}
-
-				 System.out.println(rowCnt + " : " + level + " : " + turn + " : " + word);
+				jsonWord = JsonWord.getBuilder()
+								   .setWord(word)                   
+							       .setWordType(wordType)           
+								   .setMean(mean)                   
+								   .setSentence(wordSentence)       
+								   .setSentence_mean(meanSentence)  
+								   .setImage(image)                 
+								   .setVoice(voice)                 
+								   .setSentence_voice(sentenceVoice)
+								   .setAvoid_type1(avoidType1)
+								   .setSentence_answer(sentenceAnswer)
+								   .setSentence_answer_voice(sentenceAnswerVoice)
+								   .build();
+								   
+				
+				jsonWord.putInList(outerContainer, version, level, turn, doubleTurn);
+				
+				System.out.println(rowCnt + " : " + level + " : " + turn + " : " + word);
 				 
 				// empty variable for next loop
-				level = null;
 				isDoubleTurn = false;
+				doubleTurn = null;
 				sentenceAnswer = null;
 				avoidType1Str = null;
 				avoidType1 = null;
@@ -429,7 +307,7 @@ public class JsonPractice {
 		}
 
 		// for order and location info of in main screen
-		Map<String, Map<Integer, WordLocInfo>> wordLocContainer = initWordInfoLoc(workPath, basicCondition.getLocInfoExcel());
+		Map<String, Map<Integer, WordLocInfo>> wordLocContainer = initWordInfoLoc(workPath, basicCondition.getLocInfoExcelName());
 		for(char lvCnt = 'C'; lvCnt <= 'L'; lvCnt++) {
 			Map<String, JsonWordList> innerContr;
 			innerContr = outerContainer.get(String.valueOf(lvCnt));
@@ -438,7 +316,7 @@ public class JsonPractice {
 				continue;
 			}
 			
-			for(String turnCnt : turns) {
+			for(String turnCnt : basicCondition.getTurns()) {
 				innerContr.get(turnCnt).setOrderAndMargin(wordLocContainer);
 			}
 		}
@@ -495,7 +373,8 @@ public class JsonPractice {
 		BasicCondition con1 = BasicCondition.getBuilder()
 											.setWorkingDir("work3")
 											.setWordExcelName("excel1_8.xlsx")
-											.setLocInfoExcel("excel_word_margin.xlsx")
+											.setSightwordExcelName("excel_sightword.xlsx")
+											.setLocInfoExcelName("excel_word_margin.xlsx")
 											.setInterval(2)
 											.setLvStart('A')
 											.setTurnRange(1, 8)
@@ -506,16 +385,17 @@ public class JsonPractice {
 		BasicCondition con2 = BasicCondition.getBuilder()
 											.setWorkingDir("work3")
 											.setWordExcelName("excel9_16.xlsx")
-											.setLocInfoExcel("excel_word_margin.xlsx")
+											.setSightwordExcelName("excel_sightword.xlsx")
+											.setLocInfoExcelName("excel_word_margin.xlsx")
 											.setInterval(2)
 											.setLvStart('A')
 											.setTurnRange(9, 16)
 											.setVersion("1.0")
-//											.setJsonFileOutput(true)
+											.setJsonFileOutput(true)
 											.build();
 		
 		vocaAppJsonWork(con1);
-//		vocaAppJsonWork(con2);
+		vocaAppJsonWork(con2);
 		
 	}
 }

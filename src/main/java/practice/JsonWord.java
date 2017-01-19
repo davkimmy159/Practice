@@ -34,29 +34,45 @@ public class JsonWord {
 
 	private static Object lock = new Object();
 	private static JsonWordBuilder builder;
-	
-	public JsonWord(JsonWordBuilder builder) {
-		word = "";
-		wordType = "";
-		mean = "";
-		image = "";
-		image_check = "";
-		voice = "";
-		voice_check = "";
-		sentence = "";
-		sentence_mean = "";
-		sentence_voice = "";
-		sentence_voice_check = "";
-		sentence_answer = "";
-		sentence_answer_voice = "";
-		sentence_answer_voice_check = "";
-		train_number = "";
-		start_margin = "";
+
+	private JsonWord(JsonWordBuilder builder) {
+		this.word = builder.word;
+		this.wordType = builder.wordType;
+		this.mean = builder.mean;
+		this.image = builder.image;
+		this.image_check = builder.image_check;
+		this.voice = builder.voice;
+		this.voice_check = builder.voice_check;
+		this.sentence = builder.sentence;
+		this.sentence_mean = builder.sentence_mean;
+		this.sentence_voice = builder.sentence_voice;
+		this.sentence_voice_check = builder.sentence_voice_check;
+		this.sentence_answer = builder.sentence_answer;
+		this.sentence_answer_voice = builder.sentence_answer_voice;
+		this.sentence_answer_voice_check = builder.sentence_answer_voice_check;
+		this.train_number = builder.train_number;
+		this.start_margin = builder.start_margin;
+
+		builder.word = "";
+		builder.wordType = "";
+		builder.mean = "";
+		builder.image = "";
+		builder.image_check = "";
+		builder.voice = "";
+		builder.voice_check = "";
+		builder.sentence = "";
+		builder.sentence_mean = "";
+		builder.sentence_voice = "";
+		builder.sentence_voice_check = "";
+		builder.sentence_answer = "";
+		builder.sentence_answer_voice = "";
+		builder.sentence_answer_voice_check = "";
+		builder.train_number = "";
+		builder.start_margin = "";
 	}
 
 	@EqualsAndHashCode
 	@ToString
-	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class JsonWordBuilder {
 		@Getter
@@ -93,6 +109,13 @@ public class JsonWord {
 		private String train_number;
 		@Getter
 		private String start_margin;
+
+		private JsonWordBuilder() {
+		}
+		
+		public JsonWord build() {
+			return new JsonWord(builder);
+		}
 
 		public JsonWordBuilder setWord(String word) {
 			this.word = word;
@@ -150,12 +173,16 @@ public class JsonWord {
 		}
 
 		public JsonWordBuilder setSentence_answer(String sentence_answer) {
-			this.sentence_answer = sentence_answer;
+			if (sentence_answer != null) {
+				this.sentence_answer = sentence_answer;
+			}
 			return builder;
 		}
 
 		public JsonWordBuilder setSentence_answer_voice(String sentence_answer_voice) {
-			this.sentence_answer_voice = sentence_answer_voice;
+			if (sentence_answer_voice != null) {
+				this.sentence_answer_voice = sentence_answer_voice;
+			}
 			return builder;
 		}
 
@@ -178,31 +205,67 @@ public class JsonWord {
 			this.start_margin = start_margin;
 			return builder;
 		}
-
 	}
 
-	public void putInList(Map<String, Map<String, JsonWordList>> container, String version, String level, String turn, String[] turns) {
+	public static JsonWordBuilder getBuilder() {
+		if (builder == null) {
+			synchronized (lock) {
+				if (builder == null) {
+					builder = new JsonWordBuilder();
+					builder.word = "";
+					builder.wordType = "";
+					builder.mean = "";
+					builder.image = "";
+					builder.image_check = "";
+					builder.voice = "";
+					builder.voice_check = "";
+					builder.sentence = "";
+					builder.sentence_mean = "";
+					builder.sentence_voice = "";
+					builder.sentence_voice_check = "";
+					builder.sentence_answer = "";
+					builder.sentence_answer_voice = "";
+					builder.sentence_answer_voice_check = "";
+					builder.train_number = "";
+					builder.start_margin = "";
+				}
+			}
+		}
+		return builder;
+	}
+
+	public void putInList(Map<String, Map<String, JsonWordList>> container, String version, String level, String turn, String[] doubleTurn) {
 		Map<String, JsonWordList> innerContainer = container.get(level);
 		if (innerContainer == null) {
 			innerContainer = new HashMap<>();
 			container.put(level, innerContainer);
-			System.out.println(level + " : " + turn);
+			// System.out.println(level + " : " + turn);
 		}
 
+		JsonWordList jsonWordList;
+		if (doubleTurn == null) {
+			// C ~ L
+			addWordToJsonWordList(innerContainer, version, level, turn, doubleTurn);
+		} else {
+			// A, B
+			for (String eachTurn : doubleTurn) {
+				addWordToJsonWordList(innerContainer, version, level, eachTurn, doubleTurn);
+			}
+		}
+	}
+	
+	private void addWordToJsonWordList(Map<String, JsonWordList> innerContainer, String version, String level, String turn, String[] doubleTurn) {
 		JsonWordList jsonWordList = innerContainer.get(turn);
 		if (jsonWordList == null) {
-			if ("A".equals(level) || "B".equals(level)) {
-				jsonWordList = new JsonWordListWithSightword(version, level, turn);
-			} else {
+			if(!"A".equals(level) && !"B".equals(level)) {
 				jsonWordList = new JsonWordList(version, level, turn);
+				jsonWordList.setTurns(new String[] { turn });
+			} else {
+				jsonWordList = new JsonWordListWithSightword(version, level, turn);
+				jsonWordList.setTurns(doubleTurn);
 			}
 			innerContainer.put(turn, jsonWordList);
 		}
-
-		if (null == jsonWordList.getTurns()) {
-			jsonWordList.setTurns(turns);
-		}
 		jsonWordList.addWord(this);
-
 	}
 }
