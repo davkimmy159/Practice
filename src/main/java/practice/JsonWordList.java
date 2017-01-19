@@ -2,7 +2,15 @@ package practice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class JsonWordList {
 	private String version;
 	private String level;
@@ -18,47 +26,57 @@ public class JsonWordList {
 		words = new ArrayList<>();
 	}
 
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public String getLevel() {
-		return level;
-	}
-
-	public void setLevel(String level) {
-		this.level = level;
-	}
-
-	public String getTurn() {
-		return turn;
-	}
-
-	public void setTurn(String turn) {
-		this.turn = turn;
-	}
-
-	public String[] getTurns() {
-		return turns;
-	}
-
-	public void setTurns(String[] turns) {
-		this.turns = turns;
-	}
-
-	public List<JsonWord> getWords() {
-		return words;
-	}
-
-	public void setWords(List<JsonWord> words) {
-		this.words = words;
-	}
-	
 	public void addWord(JsonWord jsonWord) {
 		words.add(jsonWord);
+	}
+	
+	public void setOrderAndMargin(Map<String, Map<Integer, WordLocInfo>> wordLocContainer) {
+		setOrder();
+		Map<Integer, WordLocInfo> innerContainer = null;
+		WordLocInfo wordLocInfo = null;
+		
+		List<Integer> wordCntStds;
+		List<Integer> values;
+		
+		int wordTotCnt = words.size();
+		int wordCntCheck = 0;
+		int wordIndex = 0;
+		boolean found = false;
+		int eachWordStd;
+		
+		for(String key : wordLocContainer.keySet()) {
+			if(key.contains(level)) {
+				innerContainer = wordLocContainer.get(key);
+				found = true;
+			}
+		}
+		
+		if(found) {
+			wordLocInfo = innerContainer.get(wordTotCnt);
+			wordCntStds = wordLocInfo.getWordStd();
+			values = wordLocInfo.getValues();
+			
+//			System.out.println(level + " : " + turn);			
+//			System.out.println(wordCntStds);
+//			System.out.println(values);
+			
+			for(int cnt = 0; cnt < wordCntStds.size(); cnt++) {
+				eachWordStd = wordCntStds.get(cnt);
+				wordCntCheck += eachWordStd;
+
+//				System.out.println("[" + eachWordStd + " : " + wordCntCheck + "] ");
+				while(wordIndex < wordCntCheck) {
+//					System.out.println(words.get(wordIndex).getWord());
+					words.get(wordIndex++).setStart_margin(String.valueOf(values.get(cnt)));
+				}
+			}
+		}
+	}
+	
+	private void setOrder() {
+		int orderValue = 1;
+		for(JsonWord jsonWord : words) {
+			jsonWord.setTrain_number(String.valueOf(orderValue++));
+		}
 	}
 }

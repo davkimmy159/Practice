@@ -1,11 +1,6 @@
 package practice;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,36 +16,6 @@ import com.google.gson.GsonBuilder;
 
 public class JsonPractice {
 
-	private static void initWorkRange(List<String> levels, List<String> turns, int interval, char lvStart, int turnStart, int turnEnd) {
-		if (interval == 2) {
-			for (char lv = lvStart; lv <= 'L'; lv += 2) {
-				levels.add(String.valueOf(lv));
-			}
-		} else {
-			for (char lv = lvStart; lv <= 'L'; lv++) {
-				levels.add(String.valueOf(lv));
-			}
-		}
-
-		for (int turn = turnStart; turn <= turnEnd; turn++) {
-			turns.add(String.valueOf(turn));
-		}
-	}
-
-	private static XSSFWorkbook loadExcel(File excel) {
-		XSSFWorkbook wb = null;
-
-		try {
-			wb = new XSSFWorkbook(new FileInputStream(excel));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return wb;
-	}
-
 	private static void putInList(Map<String, Map<String, JsonWordList>> container, String version, String level, String turn, String[] turns, JsonWord jsonWord) {
 		JsonWordList jsonWordList = container.get(level).get(turn);
 
@@ -60,27 +25,6 @@ public class JsonPractice {
 
 		jsonWordList.setTurns(turns);
 		jsonWordList.addWord(jsonWord);
-	}
-
-	public static String getFileName(File file) {
-		return file.getName().substring(0, file.getName().indexOf('.')).trim();
-	}
-
-	public static void fileWrite(String source, File dest) {
-		try {
-			// BufferedWriter 와 FileWriter를 조합하여 사용 (속도 향상)
-			BufferedWriter fw = new BufferedWriter(new FileWriter(dest, true));
-
-			// 파일안에 문자열 쓰기
-			fw.write(source);
-			fw.flush();
-
-			// 객체 닫기
-			fw.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	private static Sightword makeSightword(XSSFRow row, int wordRow, int meanRow, String voiceExt) {
@@ -101,7 +45,7 @@ public class JsonPractice {
 	}
 	
 	private static Map<String, Map<String, List<Sightword>>> sightwordWork(String workPath) {
-		File excel = new File(workPath + "excel_sightword.xlsx");
+		String excelPath = workPath + "excel_sightword.xlsx";
 		
 		Map<String, Map<String, List<Sightword>>> outerContainer = new HashMap<>();
 		Map<String, List<Sightword>> innerContainerA = new HashMap<>();
@@ -111,7 +55,7 @@ public class JsonPractice {
 		outerContainer.put("B", innerContainerB);
 		
 		XSSFWorkbook wb = null;
-		wb = loadExcel(excel);
+		wb = Util.loadExcel(excelPath);
 
 		XSSFSheet sheet;
 		XSSFRow row;
@@ -170,17 +114,76 @@ public class JsonPractice {
 		
 		return outerContainer;
 	}
+
+	public static Map<String, Map<Integer, WordLocInfo>> initWordInfoLoc(String workPath, String excelName) {
+		String excelPath = workPath + excelName;
+		XSSFWorkbook wb = Util.loadExcel(excelPath);
+		XSSFSheet sheet = wb.getSheetAt(0);
+		XSSFRow row = sheet.getRow(1);
+
+		String level = null;
+		int wordCnt = 0;
+		String discription = null;
+		List<Integer> valueList;
+		int value = 0;
+		
+		Map<String, Map<Integer, WordLocInfo>> outerContainer = new HashMap<>();
+		Map<Integer, WordLocInfo> innerContainer;
+		WordLocInfo wordLocInfo;
+		outerContainer.put("CD,EF", new HashMap<>());
+		outerContainer.put("GH,IJ,KL", new HashMap<>());
+		
+		for (int rowCnt = 1;; rowCnt++) {
+			row = sheet.getRow(rowCnt);
+			
+			try {
+				level = row.getCell(0).getStringCellValue().trim().replace(" ", "");
+			} catch (NullPointerException ex) {
+				// break if no more row
+				break;
+			}
+			
+			try {
+				wordCnt = (int)row.getCell(1).getNumericCellValue();
+			} catch (NullPointerException ex) {
+			}
+			
+			try {
+				discription = row.getCell(2).getStringCellValue().trim();
+			} catch (NullPointerException ex) {
+			}
+			
+			valueList = new ArrayList<>();
+			for(int cnt = 0; cnt < 4; cnt++) {
+				try {
+					value = (int)row.getCell(cnt + 3).getNumericCellValue();
+				} catch (NullPointerException ex) {
+					value = 0;
+				}
+				
+				if(value > 0) {
+					valueList.add(value);	
+				}
+			}
+			
+			wordLocInfo = new WordLocInfo(discription, valueList);
+			innerContainer = outerContainer.get(level);
+			innerContainer.put(wordCnt, wordLocInfo);
+		}
+		
+		return outerContainer;
+	}
 	
 	/* Voca app json */
-	private static void vocaAppJson(String workingDir, String excelName, int interval, char lvStart, int turnStart, int turnEnd) {
-		String workPath = "D:" + File.separator + "work" + File.separator + workingDir + File.separator;
-		String basePath = workPath + "result" + File.separator;
-		String jsonPath = workPath + "json_result" + File.separator;
-		File excel = new File(workPath + excelName);
+	private static void vocaAppJsonWork(BasicCondition basicCondition) {
+		String workPath = Util.makeBasicDirPath("D:", "work", basicCondition.getWorkingDir());
+		String basePath = Util.makeBasicDirPath(workPath + "result");
+		String jsonPath = Util.makeBasicDirPath(workPath + "json_result");
+		String excelPath = workPath + basicCondition.getWordExcelName();
 
-		String version = "1.0";
-		List<String> levels = new ArrayList<>();
-		List<String> turns = new ArrayList<>();
+		String version = basicCondition.getVersion();
+		List<String> levels = basicCondition.getLevels();
+		List<String> turns = basicCondition.getTurns();
 		Map<String, Map<String, JsonWordList>> outerContainer = new HashMap<>();
 		Map<String, JsonWordList> innerContainer;
 
@@ -188,10 +191,8 @@ public class JsonPractice {
 		sightwordContainer = sightwordWork(workPath);
 		
 		XSSFWorkbook wb = null;
-
-		initWorkRange(levels, turns, interval, lvStart, turnStart, turnEnd);
-		wb = loadExcel(excel);
-
+		wb = Util.loadExcel(excelPath);
+		
 		for (String level : levels) {
 			innerContainer = new HashMap<>();
 			for (String turn : turns) {
@@ -223,8 +224,6 @@ public class JsonPractice {
 		String[] avoidType1 = null;
 		String avoidType1Str = null;
 		String capWord = null;
-		char behindChar;
-		int sentenceLength = 0;
 		
 		// 파일
 		String image = null;
@@ -321,10 +320,13 @@ public class JsonPractice {
 				
 				meanSentence = row.getCell(5).getStringCellValue().trim();
 				
+				// checks double quote in sentence
+				/*
 				if(wordSentence.contains("\"")) {
 					System.out.println(level + " : " + turn + " : " + word + " : " + wordSentence + " : " + wordSentence.indexOf("\""));
 					
 				}
+				*/
 				
 				// image
 				try {
@@ -353,7 +355,7 @@ public class JsonPractice {
 				} catch (NullPointerException ex) {
 					
 				}
-				if(voiceClsf == null || "".equals(voiceClsf)) {
+				if(null == voiceClsf || "".equals(voiceClsf)) {
 					voice = word + voiceExt;	
 				} else {
 					voice = voiceClsf + voiceExt;
@@ -403,7 +405,6 @@ public class JsonPractice {
 				jsonWord.setMean(mean);
 				jsonWord.setSentence(wordSentence);
 				jsonWord.setSentence_mean(meanSentence);
-
 				jsonWord.setImage(image);
 				jsonWord.setVoice(voice);
 				jsonWord.setSentence_voice(sentenceVoice);
@@ -419,16 +420,17 @@ public class JsonPractice {
 				}
 
 				if (!isDoubleTurn) {
-					// System.out.println("----- " + level + " : " + turn + " :
-					// " + word + " -----");
 					putInList(outerContainer, version, level, turn, new String[] { turn }, jsonWord);
 				} else {
 					for (String eachTurn : doubleTurn) {
 						putInList(outerContainer, version, level, eachTurn, doubleTurn, jsonWord);
 					}
 				}
-				
+
+//				 System.out.println(rowCnt + " : " + level + " : " + turn + " : " + word + " -----");
+				 
 				// empty variable for next loop
+				level = null;
 				isDoubleTurn = false;
 				sentenceAnswer = null;
 				avoidType1Str = null;
@@ -441,7 +443,7 @@ public class JsonPractice {
 		for(char sightwordLv = 'A'; sightwordLv <= 'B'; sightwordLv++) {
 			sightwordLvCnt = String.valueOf(sightwordLv);
 			String turnCnt;
-			for(int cnt = turnStart; cnt <= turnEnd; cnt++) {
+			for(int cnt = basicCondition.getTurnStart(); cnt <= basicCondition.getTurnEnd(); cnt++) {
 				turnCnt = String.valueOf(cnt);
 				
 				innerContainer = outerContainer.get(sightwordLvCnt);
@@ -449,6 +451,21 @@ public class JsonPractice {
 					wordListWithSt = (JsonWordListWithSightword)innerContainer.get(turnCnt);
 					wordListWithSt.setSightwords(sightwordContainer.get(sightwordLvCnt).get(turnCnt));	
 				}
+			}
+		}
+
+		// for order and location info of in main screen
+		Map<String, Map<Integer, WordLocInfo>> wordLocContainer = initWordInfoLoc(workPath, basicCondition.getLocInfoExcel());
+		for(char lvCnt = 'C'; lvCnt <= 'L'; lvCnt++) {
+			Map<String, JsonWordList> innerContr;
+			innerContr = outerContainer.get(String.valueOf(lvCnt));
+			
+			if(innerContr == null) {
+				continue;
+			}
+			
+			for(String turnCnt : turns) {
+				innerContr.get(turnCnt).setOrderAndMargin(wordLocContainer);
 			}
 		}
 		
@@ -488,17 +505,40 @@ public class JsonPractice {
 				}
 				file2 = new File(dirs2.getPath() + File.separator + "contents.json");
 				
-//				fileWrite(json, file1);
-//				fileWrite(json, file2);
-//				System.out.println(file1);
+				if(basicCondition.isJsonFileOutput()) {
+					Util.fileWrite(json, file1);
+					Util.fileWrite(json, file2);
+					System.out.println(file1);	
+				}
 			}
 		}
 	}
 	
 	public static void main(String[] args) {
-		/* Voca app json */
-		vocaAppJson("work3", "excel1_8.xlsx", 2, 'A', 1, 8);
-
-//		vocaAppJson("work3", "excel9_16.xlsx", 2, 'A', 9, 16);
+		BasicCondition con1 = BasicCondition.getBuilder()
+											.setWorkingDir("work3")
+											.setWordExcelName("excel1_8.xlsx")
+											.setLocInfoExcel("excel_word_margin.xlsx")
+											.setInterval(2)
+											.setLvStart('A')
+											.setTurnRange(1, 8)
+											.setVersion("1.0")
+//											.setJsonFileOutput(true)
+											.build();
+		
+		BasicCondition con2 = BasicCondition.getBuilder()
+											.setWorkingDir("work3")
+											.setWordExcelName("excel9_16.xlsx")
+											.setLocInfoExcel("excel_word_margin.xlsx")
+											.setInterval(2)
+											.setLvStart('A')
+											.setTurnRange(9, 16)
+											.setVersion("1.0")
+//											.setJsonFileOutput(true)
+											.build();
+		
+		vocaAppJsonWork(con1);
+//		vocaAppJsonWork(con2);
+		
 	}
 }
