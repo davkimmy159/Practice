@@ -20,6 +20,7 @@ public class BasicCondition {
 	private String locInfoExcelName;
 	private int interval;
 	private char lvStart;
+	private char lvEnd;
 	private int turnStart;
 	private int turnEnd;
 	private String version;
@@ -38,6 +39,7 @@ public class BasicCondition {
 		this.locInfoExcelName = builder.locInfoExcelName;
 		this.interval = builder.interval;
 		this.lvStart = builder.lvStart;
+		this.lvEnd = builder.lvEnd;
 		this.turnStart = builder.turnStart;
 		this.turnEnd = builder.turnEnd;
 		this.version = builder.version;
@@ -51,6 +53,7 @@ public class BasicCondition {
 		builder.locInfoExcelName = null;
 		builder.interval = 0;
 		builder.lvStart = 0;
+		builder.lvEnd = 0;
 		builder.turnStart = 0;
 		builder.turnEnd = 0;
 		builder.version = null;
@@ -76,6 +79,8 @@ public class BasicCondition {
 		private int interval;
 		@Getter
 		private char lvStart;
+		@Getter
+		private char lvEnd;
 		@Getter
 		private int turnStart;
 		@Getter
@@ -128,6 +133,11 @@ public class BasicCondition {
 			this.lvStart = lvStart;
 			return builder;
 		}
+		
+		public ConditionBuilder setLvEnd(char lvEnd) {
+			this.lvEnd = lvEnd;
+			return builder;
+		}
 
 		public ConditionBuilder setTurnRange(int turnStart, int turnEnd) {
 			this.turnStart = turnStart;
@@ -162,7 +172,7 @@ public class BasicCondition {
 		
 		private void setTurns() {
 			turns = new ArrayList<>();
-			lvStart = lvStart != 'A' && lvStart != 'B' ? 'A' : lvStart;
+//			lvStart = lvStart != 'A' && lvStart != 'B' ? 'A' : lvStart;
 			
 			for (int turn = turnStart; turn <= turnEnd; turn++) {
 				turns.add(String.valueOf(turn));

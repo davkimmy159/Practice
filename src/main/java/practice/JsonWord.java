@@ -50,6 +50,7 @@ public class JsonWord {
 		this.sentence_answer = builder.sentence_answer;
 		this.sentence_answer_voice = builder.sentence_answer_voice;
 		this.sentence_answer_voice_check = builder.sentence_answer_voice_check;
+		this.avoid_type1 = builder.avoid_type1;
 		this.train_number = builder.train_number;
 		this.start_margin = builder.start_margin;
 
@@ -67,6 +68,7 @@ public class JsonWord {
 		builder.sentence_answer = "";
 		builder.sentence_answer_voice = "";
 		builder.sentence_answer_voice_check = "";
+		builder.avoid_type1 = null;
 		builder.train_number = "";
 		builder.start_margin = "";
 	}
@@ -116,7 +118,12 @@ public class JsonWord {
 		public JsonWord build() {
 			return new JsonWord(builder);
 		}
-
+		
+		public JsonWordBuilder treatSpecificWord(String level, String turn) {
+			JsonWord.helpTreatSpecificWord(level, turn, this.word);
+			return builder;
+		}
+		
 		public JsonWordBuilder setWord(String word) {
 			this.word = word;
 			return builder;
@@ -242,7 +249,6 @@ public class JsonWord {
 			// System.out.println(level + " : " + turn);
 		}
 
-		JsonWordList jsonWordList;
 		if (doubleTurn == null) {
 			// C ~ L
 			addWordToJsonWordList(innerContainer, version, level, turn, doubleTurn);
@@ -267,5 +273,59 @@ public class JsonWord {
 			innerContainer.put(turn, jsonWordList);
 		}
 		jsonWordList.addWord(this);
+	}
+	
+	public static boolean doesMatch(String targetLevel, String targetTurn, String targetWord, String level, String turn, String word) {
+		boolean flag;
+		if (targetLevel.equals(level) && targetTurn.equals(turn) && targetWord.equals(word)) {
+			flag = true;
+		} else {
+			flag = false;
+		}
+		return flag;
+	}
+
+	private static void helpTreatSpecificWord(String level, String turn, String word) {
+		
+		// treat specific word here
+		if(doesMatch("C", "3", "You're welcome.", level, turn, word)) {
+			builder.image = builder.image.replace("..", ".");
+		} else if(doesMatch("G", "5", "do", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(do) y", "do y");
+		} else if(doesMatch("G", "6", "How about ~?", level, turn, word)) {
+			builder.image = builder.image.replace(" ~?", "");
+		} else if(doesMatch("G", "19", "Why don't you~?", level, turn, word)) {
+			builder.voice = builder.voice.replace("~?", "");
+			builder.image = builder.image.replace("~?", "");
+			builder.sentence_voice = builder.sentence_voice.replace("~?", "");
+		} else if(doesMatch("I", "7", "nod", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(nodding)", "[(nod)ding]");
+		} else if(doesMatch("I", "7", "hug", level, turn, word)) {
+			builder.sentence= builder.sentence.replace("(hugging)", "[(hug)ging]");
+		} else if(doesMatch("I", "8", "duck", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(duck)ling", "duckling");
+		} else if(doesMatch("F", "4", "bed", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(bed)room", "bedroom");
+		} else if(doesMatch("J", "1", "quiz", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(quizzing)", "(quiz)");
+		} else if(doesMatch("J", "10", "can", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(can)", "can");
+		} else if(doesMatch("J", "11", "weigh", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(weigh)t", "weight");
+		} else if(doesMatch("H", "4", "brush your hair", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(brush)", "brush");
+			builder.sentence = builder.sentence.replace("(hair)", "hair");
+			builder.sentence = builder.sentence.replace("[", "(");
+			builder.sentence = builder.sentence.replace("]", ")");
+		} else if(doesMatch("H", "4", "brush your teeth", level, turn, word)) {
+			builder.sentence = builder.sentence.replace("(brush)", "brush");
+			builder.sentence = builder.sentence.replace("(teeth)", "teeth");
+			builder.sentence = builder.sentence.replace("[", "(");
+			builder.sentence = builder.sentence.replace("]", ")");
+		} else if(doesMatch("H", "1", "That's all", level, turn, word)) {
+			builder.sentence = builder.sentence.replace(").", ".)");
+		} else if(doesMatch("H", "1", "That's why", level, turn, word)) {
+			builder.sentence = builder.sentence.replace(").", ".)");
+		}
 	}
 }
