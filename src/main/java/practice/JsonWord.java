@@ -11,8 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@Data
-@AllArgsConstructor
 public class JsonWord {
 	private String word;
 	private String wordType;
@@ -31,6 +29,28 @@ public class JsonWord {
 	private String[] avoid_type1;
 	private String train_number;
 	private String start_margin;
+
+	public JsonWord(){
+	}
+	public JsonWord(String word, String wordType, String mean, String image, String image_check, String voice, String voice_check, String sentence, String sentence_mean, String sentence_voice, String sentence_voice_check, String sentence_answer, String sentence_answer_voice, String sentence_answer_voice_check, String[] avoid_type1, String train_number, String start_margin) {
+		this.word = word;
+		this.wordType = wordType;
+		this.mean = mean;
+		this.image = image;
+		this.image_check = image_check;
+		this.voice = voice;
+		this.voice_check = voice_check;
+		this.sentence = sentence;
+		this.sentence_mean = sentence_mean;
+		this.sentence_voice = sentence_voice;
+		this.sentence_voice_check = sentence_voice_check;
+		this.sentence_answer = sentence_answer;
+		this.sentence_answer_voice = sentence_answer_voice;
+		this.sentence_answer_voice_check = sentence_answer_voice_check;
+		this.avoid_type1 = avoid_type1;
+		this.train_number = train_number;
+		this.start_margin = start_margin;
+	}
 
 	private static Object lock = new Object();
 	private static JsonWordBuilder builder;
@@ -73,43 +93,23 @@ public class JsonWord {
 		builder.start_margin = "";
 	}
 
-	@EqualsAndHashCode
-	@ToString
-	@AllArgsConstructor
 	public static class JsonWordBuilder {
-		@Getter
 		private String word;
-		@Getter
 		private String wordType;
-		@Getter
 		private String mean;
-		@Getter
 		private String image;
-		@Getter
 		private String image_check;
-		@Getter
 		private String voice;
-		@Getter
 		private String voice_check;
-		@Getter
 		private String sentence;
-		@Getter
 		private String sentence_mean;
-		@Getter
 		private String sentence_voice;
-		@Getter
 		private String sentence_voice_check;
-		@Getter
 		private String sentence_answer;
-		@Getter
 		private String sentence_answer_voice;
-		@Getter
 		private String sentence_answer_voice_check;
-		@Getter
 		private String[] avoid_type1;
-		@Getter
 		private String train_number;
-		@Getter
 		private String start_margin;
 
 		private JsonWordBuilder() {
@@ -211,6 +211,74 @@ public class JsonWord {
 		public JsonWordBuilder setStart_margin(String start_margin) {
 			this.start_margin = start_margin;
 			return builder;
+		}
+
+		public String getWord() {
+			return word;
+		}
+
+		public String getWordType() {
+			return wordType;
+		}
+
+		public String getMean() {
+			return mean;
+		}
+
+		public String getImage() {
+			return image;
+		}
+
+		public String getImage_check() {
+			return image_check;
+		}
+
+		public String getVoice() {
+			return voice;
+		}
+
+		public String getVoice_check() {
+			return voice_check;
+		}
+
+		public String getSentence() {
+			return sentence;
+		}
+
+		public String getSentence_mean() {
+			return sentence_mean;
+		}
+
+		public String getSentence_voice() {
+			return sentence_voice;
+		}
+
+		public String getSentence_voice_check() {
+			return sentence_voice_check;
+		}
+
+		public String getSentence_answer() {
+			return sentence_answer;
+		}
+
+		public String getSentence_answer_voice() {
+			return sentence_answer_voice;
+		}
+
+		public String getSentence_answer_voice_check() {
+			return sentence_answer_voice_check;
+		}
+
+		public String[] getAvoid_type1() {
+			return avoid_type1;
+		}
+
+		public String getTrain_number() {
+			return train_number;
+		}
+
+		public String getStart_margin() {
+			return start_margin;
 		}
 	}
 
@@ -327,5 +395,153 @@ public class JsonWord {
 		} else if(doesMatch("H", "1", "That's why", level, turn, word)) {
 			builder.sentence = builder.sentence.replace(").", ".)");
 		}
+	}
+
+	public String getWord() {
+		return word;
+	}
+
+	public void setWord(String word) {
+		this.word = word;
+	}
+
+	public String getWordType() {
+		return wordType;
+	}
+
+	public void setWordType(String wordType) {
+		this.wordType = wordType;
+	}
+
+	public String getMean() {
+		return mean;
+	}
+
+	public void setMean(String mean) {
+		this.mean = mean;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public String getImage_check() {
+		return image_check;
+	}
+
+	public void setImage_check(String image_check) {
+		this.image_check = image_check;
+	}
+
+	public String getVoice() {
+		return voice;
+	}
+
+	public void setVoice(String voice) {
+		this.voice = voice;
+	}
+
+	public String getVoice_check() {
+		return voice_check;
+	}
+
+	public void setVoice_check(String voice_check) {
+		this.voice_check = voice_check;
+	}
+
+	public String getSentence() {
+		return sentence;
+	}
+
+	public void setSentence(String sentence) {
+		this.sentence = sentence;
+	}
+
+	public String getSentence_mean() {
+		return sentence_mean;
+	}
+
+	public void setSentence_mean(String sentence_mean) {
+		this.sentence_mean = sentence_mean;
+	}
+
+	public String getSentence_voice() {
+		return sentence_voice;
+	}
+
+	public void setSentence_voice(String sentence_voice) {
+		this.sentence_voice = sentence_voice;
+	}
+
+	public String getSentence_voice_check() {
+		return sentence_voice_check;
+	}
+
+	public void setSentence_voice_check(String sentence_voice_check) {
+		this.sentence_voice_check = sentence_voice_check;
+	}
+
+	public String getSentence_answer() {
+		return sentence_answer;
+	}
+
+	public void setSentence_answer(String sentence_answer) {
+		this.sentence_answer = sentence_answer;
+	}
+
+	public String getSentence_answer_voice() {
+		return sentence_answer_voice;
+	}
+
+	public void setSentence_answer_voice(String sentence_answer_voice) {
+		this.sentence_answer_voice = sentence_answer_voice;
+	}
+
+	public String getSentence_answer_voice_check() {
+		return sentence_answer_voice_check;
+	}
+
+	public void setSentence_answer_voice_check(String sentence_answer_voice_check) {
+		this.sentence_answer_voice_check = sentence_answer_voice_check;
+	}
+
+	public String[] getAvoid_type1() {
+		return avoid_type1;
+	}
+
+	public void setAvoid_type1(String[] avoid_type1) {
+		this.avoid_type1 = avoid_type1;
+	}
+
+	public String getTrain_number() {
+		return train_number;
+	}
+
+	public void setTrain_number(String train_number) {
+		this.train_number = train_number;
+	}
+
+	public String getStart_margin() {
+		return start_margin;
+	}
+
+	public void setStart_margin(String start_margin) {
+		this.start_margin = start_margin;
+	}
+
+	public static Object getLock() {
+		return lock;
+	}
+
+	public static void setLock(Object lock) {
+		JsonWord.lock = lock;
+	}
+
+	public static void setBuilder(JsonWordBuilder builder) {
+		JsonWord.builder = builder;
 	}
 }

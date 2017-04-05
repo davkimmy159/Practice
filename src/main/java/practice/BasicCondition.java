@@ -10,9 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class BasicCondition {
 	private String workingDir;
 	private String wordExcelName;
@@ -188,5 +185,121 @@ public class BasicCondition {
 			}
 		}
 		return builder;
+	}
+
+	public String getWorkingDir() {
+		return workingDir;
+	}
+
+	public void setWorkingDir(String workingDir) {
+		this.workingDir = workingDir;
+	}
+
+	public String getWordExcelName() {
+		return wordExcelName;
+	}
+
+	public void setWordExcelName(String wordExcelName) {
+		this.wordExcelName = wordExcelName;
+	}
+
+	public String getSightwordExcelName() {
+		return sightwordExcelName;
+	}
+
+	public void setSightwordExcelName(String sightwordExcelName) {
+		this.sightwordExcelName = sightwordExcelName;
+	}
+
+	public String getLocInfoExcelName() {
+		return locInfoExcelName;
+	}
+
+	public void setLocInfoExcelName(String locInfoExcelName) {
+		this.locInfoExcelName = locInfoExcelName;
+	}
+
+	public int getInterval() {
+		return interval;
+	}
+
+	public void setInterval(int interval) {
+		this.interval = interval;
+	}
+
+	public char getLvStart() {
+		return lvStart;
+	}
+
+	public void setLvStart(char lvStart) {
+		this.lvStart = lvStart;
+	}
+
+	public char getLvEnd() {
+		return lvEnd;
+	}
+
+	public void setLvEnd(char lvEnd) {
+		this.lvEnd = lvEnd;
+	}
+
+	public int getTurnStart() {
+		return turnStart;
+	}
+
+	public void setTurnStart(int turnStart) {
+		this.turnStart = turnStart;
+	}
+
+	public int getTurnEnd() {
+		return turnEnd;
+	}
+
+	public void setTurnEnd(int turnEnd) {
+		this.turnEnd = turnEnd;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public boolean isJsonFileOutput() {
+		return jsonFileOutput;
+	}
+
+	public void setJsonFileOutput(boolean jsonFileOutput) {
+		this.jsonFileOutput = jsonFileOutput;
+	}
+
+	public List<String> getLevels() {
+		return levels;
+	}
+
+	public void setLevels(List<String> levels) {
+		this.levels = levels;
+	}
+
+	public List<String> getTurns() {
+		return turns;
+	}
+
+	public void setTurns(List<String> turns) {
+		this.turns = turns;
+	}
+
+	public static Object getLock() {
+		return lock;
+	}
+
+	public static void setLock(Object lock) {
+		BasicCondition.lock = lock;
+	}
+
+	public static void setBuilder(ConditionBuilder builder) {
+		BasicCondition.builder = builder;
 	}
 }

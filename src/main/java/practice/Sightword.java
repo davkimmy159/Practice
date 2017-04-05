@@ -13,19 +13,25 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Sightword {
 	private String sightword;
 	private String sightword_voice;
 	private String sightword_voice_check;
 	private String sightword_mean;
 	
+	public Sightword() {
+	}
+	
+	public Sightword(String sightword, String sightword_voice, String sightword_voice_check, String sightword_mean) {
+		this.sightword = sightword;
+		this.sightword_voice = sightword_voice;
+		this.sightword_voice_check = sightword_voice_check;
+		this.sightword_mean = sightword_mean;
+	}
+
 	private static Object lock = new Object();
 	private static SightwordWork sightwordWork;
 
-	@Data
 	private static class SightwordWork {
 		private Map<String, Map<String, List<Sightword>>> outerContainer;
 		private Map<String, List<Sightword>> innerContainerA;
@@ -121,6 +127,54 @@ public class Sightword {
 				sightwordList.add(sightword);
 			}
 		}
+
+		public Map<String, Map<String, List<Sightword>>> getOuterContainer() {
+			return outerContainer;
+		}
+
+		public void setOuterContainer(Map<String, Map<String, List<Sightword>>> outerContainer) {
+			this.outerContainer = outerContainer;
+		}
+
+		public Map<String, List<Sightword>> getInnerContainerA() {
+			return innerContainerA;
+		}
+
+		public void setInnerContainerA(Map<String, List<Sightword>> innerContainerA) {
+			this.innerContainerA = innerContainerA;
+		}
+
+		public Map<String, List<Sightword>> getInnerContainerB() {
+			return innerContainerB;
+		}
+
+		public void setInnerContainerB(Map<String, List<Sightword>> innerContainerB) {
+			this.innerContainerB = innerContainerB;
+		}
+
+		public String getTurn() {
+			return turn;
+		}
+
+		public void setTurn(String turn) {
+			this.turn = turn;
+		}
+
+		public int getTurnCnt() {
+			return turnCnt;
+		}
+
+		public void setTurnCnt(int turnCnt) {
+			this.turnCnt = turnCnt;
+		}
+
+		public String getTurnCntStr() {
+			return turnCntStr;
+		}
+
+		public void setTurnCntStr(String turnCntStr) {
+			this.turnCntStr = turnCntStr;
+		}
 	}
 	
 	public static Map<String, Map<String, List<Sightword>>> getSightwordContainer(String workPath, String sightwordExcel) {
@@ -136,5 +190,53 @@ public class Sightword {
 			}
 		}
 		return sightwordWork;
+	}
+
+	public String getSightword() {
+		return sightword;
+	}
+
+	public void setSightword(String sightword) {
+		this.sightword = sightword;
+	}
+
+	public String getSightword_voice() {
+		return sightword_voice;
+	}
+
+	public void setSightword_voice(String sightword_voice) {
+		this.sightword_voice = sightword_voice;
+	}
+
+	public String getSightword_voice_check() {
+		return sightword_voice_check;
+	}
+
+	public void setSightword_voice_check(String sightword_voice_check) {
+		this.sightword_voice_check = sightword_voice_check;
+	}
+
+	public String getSightword_mean() {
+		return sightword_mean;
+	}
+
+	public void setSightword_mean(String sightword_mean) {
+		this.sightword_mean = sightword_mean;
+	}
+
+	public static Object getLock() {
+		return lock;
+	}
+
+	public static void setLock(Object lock) {
+		Sightword.lock = lock;
+	}
+
+	public static SightwordWork getSightwordWork() {
+		return sightwordWork;
+	}
+
+	public static void setSightwordWork(SightwordWork sightwordWork) {
+		Sightword.sightwordWork = sightwordWork;
 	}
 }

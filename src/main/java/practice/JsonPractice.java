@@ -389,7 +389,7 @@ public class JsonPractice {
 				try {
 					voiceClsf = row.getCell(6).getStringCellValue().trim();
 				} catch (NullPointerException ex) {
-					
+					voiceClsf = null;
 				}
 				if(null == voiceClsf || "".equals(voiceClsf)) {
 					voice = word + Util.VOICE_EXT;	
@@ -442,6 +442,9 @@ public class JsonPractice {
 					}
 				}
 				
+				System.out.println(word);
+				System.out.println(voice);
+				
 				// jsonWord
 				jsonWord = JsonWord.getBuilder()
 								   .setWord(word)                   
@@ -473,9 +476,11 @@ public class JsonPractice {
 				}
 				*/
 
+				/*
 				if("K".equals(level)) {
 					System.out.println(level + " : " + turn + " : " + word);
 				} 
+				*/
 				
 				jsonWord.putInList(outerContainer, version, level, turn, doubleTurn);
 				
@@ -662,8 +667,9 @@ public class JsonPractice {
 //		vocaAppJsonWork(con_odd_17_24);
 		
 		String excel_even_1_12 = "단어&예문_짝수단계1~12호.xlsx";
-		String excel_even_13_24 = "";
+		String excel_even_13_24 = "단어&예문_짝수단계13~24호.xlsx";
 		
+		/*
 		BasicCondition con_even_1_12 =    BasicCondition.getBuilder()
 														.setWorkingDir("work3")
 														.setWordExcelName(excel_even_1_12)
@@ -678,6 +684,24 @@ public class JsonPractice {
 														.build();
 		
 		vocaAppJsonWork(con_even_1_12);
+		*/
+		
+		BasicCondition con_even_13_24 =   BasicCondition.getBuilder()
+														.setWorkingDir("work3")
+														.setWordExcelName(excel_even_13_24)
+														.setSightwordExcelName(swExcel)
+														.setLocInfoExcelName(marginExcel)
+														.setInterval(2)
+														.setLvStart('B')
+														.setLvEnd('L')
+														.setTurnRange(13, 24)
+														.setVersion("1.0")
+														.setJsonFileOutput(true)
+														.build();
+		
+		vocaAppJsonWork(con_even_13_24);
+		
+		
 		
 //		dummyImgGen();
 	}

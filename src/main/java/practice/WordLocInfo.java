@@ -8,12 +8,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class WordLocInfo {
 	private List<Integer> wordStd;
 	private List<Integer> values;
+
+	public WordLocInfo() {
+	}
+	public WordLocInfo(List<Integer> wordStd, List<Integer> values) {
+		this.wordStd = wordStd;
+		this.values = values;
+	}
 
 	public WordLocInfo(String discription, List<Integer> valueList) {
 		setLocInfo(discription, valueList);
@@ -29,5 +33,21 @@ public class WordLocInfo {
 
 		wordStd = list;
 		values = valueList;
+	}
+
+	public List<Integer> getWordStd() {
+		return wordStd;
+	}
+
+	public void setWordStd(List<Integer> wordStd) {
+		this.wordStd = wordStd;
+	}
+
+	public List<Integer> getValues() {
+		return values;
+	}
+
+	public void setValues(List<Integer> values) {
+		this.values = values;
 	}
 }

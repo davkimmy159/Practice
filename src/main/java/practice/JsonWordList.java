@@ -9,9 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class JsonWordList {
 
 	private static Map<String, Map<String, JsonWordList>> outerContainer = new HashMap<>();
@@ -23,11 +20,22 @@ public class JsonWordList {
 
 	private List<JsonWord> words;
 	
+	public JsonWordList() {
+	}
+
 	public JsonWordList(String version, String level, String turn) {
 		this.version = version;
 		this.level = level;
 		this.turn = turn;
 		words = new ArrayList<>();
+	}
+	
+	public JsonWordList(String version, String level, String turn, String[] turns, List<JsonWord> words) {
+		this.version = version;
+		this.level = level;
+		this.turn = turn;
+		this.turns = turns;
+		this.words = words;
 	}
 
 	public static Map<String, Map<String, JsonWordList>> getContainer() {
@@ -97,5 +105,53 @@ public class JsonWordList {
 				}
 			}
 		}
+	}
+
+	public static Map<String, Map<String, JsonWordList>> getOuterContainer() {
+		return outerContainer;
+	}
+
+	public static void setOuterContainer(Map<String, Map<String, JsonWordList>> outerContainer) {
+		JsonWordList.outerContainer = outerContainer;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public String getLevel() {
+		return level;
+	}
+
+	public void setLevel(String level) {
+		this.level = level;
+	}
+
+	public String getTurn() {
+		return turn;
+	}
+
+	public void setTurn(String turn) {
+		this.turn = turn;
+	}
+
+	public String[] getTurns() {
+		return turns;
+	}
+
+	public void setTurns(String[] turns) {
+		this.turns = turns;
+	}
+
+	public List<JsonWord> getWords() {
+		return words;
+	}
+
+	public void setWords(List<JsonWord> words) {
+		this.words = words;
 	}
 }
