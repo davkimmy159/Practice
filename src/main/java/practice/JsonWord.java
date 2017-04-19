@@ -32,6 +32,7 @@ public class JsonWord {
 
 	public JsonWord(){
 	}
+	
 	public JsonWord(String word, String wordType, String mean, String image, String image_check, String voice, String voice_check, String sentence, String sentence_mean, String sentence_voice, String sentence_voice_check, String sentence_answer, String sentence_answer_voice, String sentence_answer_voice_check, String[] avoid_type1, String train_number, String start_margin) {
 		this.word = word;
 		this.wordType = wordType;
@@ -52,9 +53,6 @@ public class JsonWord {
 		this.start_margin = start_margin;
 	}
 
-	private static Object lock = new Object();
-	private static JsonWordBuilder builder;
-
 	private JsonWord(JsonWordBuilder builder) {
 		this.word = builder.word;
 		this.wordType = builder.wordType;
@@ -73,24 +71,6 @@ public class JsonWord {
 		this.avoid_type1 = builder.avoid_type1;
 		this.train_number = builder.train_number;
 		this.start_margin = builder.start_margin;
-
-		builder.word = "";
-		builder.wordType = "";
-		builder.mean = "";
-		builder.image = "";
-		builder.image_check = "";
-		builder.voice = "";
-		builder.voice_check = "";
-		builder.sentence = "";
-		builder.sentence_mean = "";
-		builder.sentence_voice = "";
-		builder.sentence_voice_check = "";
-		builder.sentence_answer = "";
-		builder.sentence_answer_voice = "";
-		builder.sentence_answer_voice_check = "";
-		builder.avoid_type1 = null;
-		builder.train_number = "";
-		builder.start_margin = "";
 	}
 
 	public static class JsonWordBuilder {
@@ -116,101 +96,140 @@ public class JsonWord {
 		}
 		
 		public JsonWord build() {
-			return new JsonWord(builder);
+			return new JsonWord(this);
 		}
 		
 		public JsonWordBuilder treatSpecificWord(String level, String turn) {
-			JsonWord.helpTreatSpecificWord(level, turn, this.word);
-			return builder;
+			// treat specific word here
+			if(doesMatch("C", "3", "You're welcome.", level, turn, word)) {
+				this.image = this.image.replace("..", ".");
+			} else if(doesMatch("G", "5", "do", level, turn, word)) {
+				this.sentence = this.sentence.replace("(do) y", "do y");
+			} else if(doesMatch("G", "6", "How about ~?", level, turn, word)) {
+				this.image = this.image.replace(" ~?", "");
+			} else if(doesMatch("G", "19", "Why don't you~?", level, turn, word)) {
+				this.voice = this.voice.replace("~?", "");
+				this.image = this.image.replace("~?", "");
+				this.sentence_voice = this.sentence_voice.replace("~?", "");
+			} else if(doesMatch("I", "7", "nod", level, turn, word)) {
+				this.sentence = this.sentence.replace("(nodding)", "[(nod)ding]");
+			} else if(doesMatch("I", "7", "hug", level, turn, word)) {
+				this.sentence= this.sentence.replace("(hugging)", "[(hug)ging]");
+			} else if(doesMatch("I", "8", "duck", level, turn, word)) {
+				this.sentence = this.sentence.replace("(duck)ling", "duckling");
+			} else if(doesMatch("F", "4", "bed", level, turn, word)) {
+				this.sentence = this.sentence.replace("(bed)room", "bedroom");
+			} else if(doesMatch("J", "1", "quiz", level, turn, word)) {
+				this.sentence = this.sentence.replace("(quizzing)", "(quiz)");
+			} else if(doesMatch("J", "10", "can", level, turn, word)) {
+				this.sentence = this.sentence.replace("(can)", "can");
+			} else if(doesMatch("J", "11", "weigh", level, turn, word)) {
+				this.sentence = this.sentence.replace("(weigh)t", "weight");
+			} else if(doesMatch("H", "4", "brush your hair", level, turn, word)) {
+				this.sentence = this.sentence.replace("(brush)", "brush");
+				this.sentence = this.sentence.replace("(hair)", "hair");
+				this.sentence = this.sentence.replace("[", "(");
+				this.sentence = this.sentence.replace("]", ")");
+			} else if(doesMatch("H", "4", "brush your teeth", level, turn, word)) {
+				this.sentence = this.sentence.replace("(brush)", "brush");
+				this.sentence = this.sentence.replace("(teeth)", "teeth");
+				this.sentence = this.sentence.replace("[", "(");
+				this.sentence = this.sentence.replace("]", ")");
+			} else if(doesMatch("H", "1", "That's all", level, turn, word)) {
+				this.sentence = this.sentence.replace(").", ".)");
+			} else if(doesMatch("H", "1", "That's why", level, turn, word)) {
+				this.sentence = this.sentence.replace(").", ".)");
+			}
+			return this;
 		}
 		
 		public JsonWordBuilder setWord(String word) {
 			this.word = word;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setWordType(String wordType) {
 			this.wordType = wordType;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setMean(String mean) {
 			this.mean = mean;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setImage(String image) {
 			this.image = image;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setImage_check(String image_check) {
 			this.image_check = image_check;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setVoice(String voice) {
 			this.voice = voice;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setVoice_check(String voice_check) {
 			this.voice_check = voice_check;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setSentence(String sentence) {
 			this.sentence = sentence;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setSentence_mean(String sentence_mean) {
 			this.sentence_mean = sentence_mean;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setSentence_voice(String sentence_voice) {
 			this.sentence_voice = sentence_voice;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setSentence_voice_check(String sentence_voice_check) {
 			this.sentence_voice_check = sentence_voice_check;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setSentence_answer(String sentence_answer) {
 			if (sentence_answer != null) {
 				this.sentence_answer = sentence_answer;
 			}
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setSentence_answer_voice(String sentence_answer_voice) {
 			if (sentence_answer_voice != null) {
 				this.sentence_answer_voice = sentence_answer_voice;
 			}
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setSentence_answer_voice_check(String sentence_answer_voice_check) {
 			this.sentence_answer_voice_check = sentence_answer_voice_check;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setAvoid_type1(String[] avoid_type1) {
 			this.avoid_type1 = avoid_type1;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setTrain_number(String train_number) {
 			this.train_number = train_number;
-			return builder;
+			return this;
 		}
 
 		public JsonWordBuilder setStart_margin(String start_margin) {
 			this.start_margin = start_margin;
-			return builder;
+			return this;
 		}
 
 		public String getWord() {
@@ -282,31 +301,8 @@ public class JsonWord {
 		}
 	}
 
-	public static JsonWordBuilder getBuilder() {
-		if (builder == null) {
-			synchronized (lock) {
-				if (builder == null) {
-					builder = new JsonWordBuilder();
-					builder.word = "";
-					builder.wordType = "";
-					builder.mean = "";
-					builder.image = "";
-					builder.image_check = "";
-					builder.voice = "";
-					builder.voice_check = "";
-					builder.sentence = "";
-					builder.sentence_mean = "";
-					builder.sentence_voice = "";
-					builder.sentence_voice_check = "";
-					builder.sentence_answer = "";
-					builder.sentence_answer_voice = "";
-					builder.sentence_answer_voice_check = "";
-					builder.train_number = "";
-					builder.start_margin = "";
-				}
-			}
-		}
-		return builder;
+	public static JsonWordBuilder builder() {
+		return new JsonWordBuilder();
 	}
 
 	public void putInList(Map<String, Map<String, JsonWordList>> container, String version, String level, String turn, String[] doubleTurn) {
@@ -354,47 +350,6 @@ public class JsonWord {
 	}
 
 	private static void helpTreatSpecificWord(String level, String turn, String word) {
-		
-		// treat specific word here
-		if(doesMatch("C", "3", "You're welcome.", level, turn, word)) {
-			builder.image = builder.image.replace("..", ".");
-		} else if(doesMatch("G", "5", "do", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(do) y", "do y");
-		} else if(doesMatch("G", "6", "How about ~?", level, turn, word)) {
-			builder.image = builder.image.replace(" ~?", "");
-		} else if(doesMatch("G", "19", "Why don't you~?", level, turn, word)) {
-			builder.voice = builder.voice.replace("~?", "");
-			builder.image = builder.image.replace("~?", "");
-			builder.sentence_voice = builder.sentence_voice.replace("~?", "");
-		} else if(doesMatch("I", "7", "nod", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(nodding)", "[(nod)ding]");
-		} else if(doesMatch("I", "7", "hug", level, turn, word)) {
-			builder.sentence= builder.sentence.replace("(hugging)", "[(hug)ging]");
-		} else if(doesMatch("I", "8", "duck", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(duck)ling", "duckling");
-		} else if(doesMatch("F", "4", "bed", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(bed)room", "bedroom");
-		} else if(doesMatch("J", "1", "quiz", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(quizzing)", "(quiz)");
-		} else if(doesMatch("J", "10", "can", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(can)", "can");
-		} else if(doesMatch("J", "11", "weigh", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(weigh)t", "weight");
-		} else if(doesMatch("H", "4", "brush your hair", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(brush)", "brush");
-			builder.sentence = builder.sentence.replace("(hair)", "hair");
-			builder.sentence = builder.sentence.replace("[", "(");
-			builder.sentence = builder.sentence.replace("]", ")");
-		} else if(doesMatch("H", "4", "brush your teeth", level, turn, word)) {
-			builder.sentence = builder.sentence.replace("(brush)", "brush");
-			builder.sentence = builder.sentence.replace("(teeth)", "teeth");
-			builder.sentence = builder.sentence.replace("[", "(");
-			builder.sentence = builder.sentence.replace("]", ")");
-		} else if(doesMatch("H", "1", "That's all", level, turn, word)) {
-			builder.sentence = builder.sentence.replace(").", ".)");
-		} else if(doesMatch("H", "1", "That's why", level, turn, word)) {
-			builder.sentence = builder.sentence.replace(").", ".)");
-		}
 	}
 
 	public String getWord() {
@@ -531,17 +486,5 @@ public class JsonWord {
 
 	public void setStart_margin(String start_margin) {
 		this.start_margin = start_margin;
-	}
-
-	public static Object getLock() {
-		return lock;
-	}
-
-	public static void setLock(Object lock) {
-		JsonWord.lock = lock;
-	}
-
-	public static void setBuilder(JsonWordBuilder builder) {
-		JsonWord.builder = builder;
 	}
 }

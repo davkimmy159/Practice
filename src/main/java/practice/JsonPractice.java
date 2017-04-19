@@ -446,7 +446,7 @@ public class JsonPractice {
 				System.out.println(voice);
 				
 				// jsonWord
-				jsonWord = JsonWord.getBuilder()
+				jsonWord = JsonWord.builder()
 								   .setWord(word)                   
 							       .setWordType(wordType)           
 								   .setMean(mean)                   
@@ -581,7 +581,7 @@ public class JsonPractice {
 	
 	public static void dummyImgGen() {
 		/*
-		BasicCondition con1 = BasicCondition.getBuilder()
+		BasicCondition con1 = BasicCondition.builder()
 											.setWorkingDir("work3")
 											.setWordExcelName("excel9_16.xlsx")
 											.setInterval(2)
@@ -591,7 +591,7 @@ public class JsonPractice {
 											.build();
 		dummyImageGenerate(con1);
 
-		BasicCondition con2 = BasicCondition.getBuilder()
+		BasicCondition con2 = BasicCondition.builder()
 											.setWorkingDir("work3")
 											.setWordExcelName("excel17_24.xlsx")
 											.setInterval(2)
@@ -602,7 +602,7 @@ public class JsonPractice {
 		dummyImageGenerate(con2);
 		*/
 		
-		BasicCondition con3 = BasicCondition.getBuilder()
+		BasicCondition con3 = BasicCondition.builder()
 											.setWorkingDir("work3")
 											.setWordExcelName("단어&예문_짝수단계1~12호.xlsx")
 											.setInterval(2)
@@ -622,7 +622,7 @@ public class JsonPractice {
 		String excel_odd_17_24 = "단어 리스트 홀수레벨 17 ~ 24.xlsx";
 		
 		/*
-		BasicCondition con_odd_1_8 =      BasicCondition.getBuilder()
+		BasicCondition con_odd_1_8 =      BasicCondition.builder()
 														.setWorkingDir("work3")
 														.setWordExcelName(excel_odd_1_8)
 														.setSightwordExcelName(swExcel)
@@ -635,7 +635,7 @@ public class JsonPractice {
 														.setJsonFileOutput(true)
 														.build();
 		
-		BasicCondition con_odd_9_16 =     BasicCondition.getBuilder()
+		BasicCondition con_odd_9_16 =     BasicCondition.builder()
 														.setWorkingDir("work3")
 														.setWordExcelName(excel_odd_9_16)
 														.setSightwordExcelName(swExcel)
@@ -648,7 +648,7 @@ public class JsonPractice {
 														.setJsonFileOutput(true)
 														.build();
 		
-		BasicCondition con_odd_17_24 =    BasicCondition.getBuilder()
+		BasicCondition con_odd_17_24 =    BasicCondition.builder()
 														.setWorkingDir("work3")
 														.setWordExcelName(excel_odd_17_24)
 														.setSightwordExcelName(swExcel)
@@ -670,7 +670,7 @@ public class JsonPractice {
 		String excel_even_13_24 = "단어&예문_짝수단계13~24호.xlsx";
 		
 		/*
-		BasicCondition con_even_1_12 =    BasicCondition.getBuilder()
+		BasicCondition con_even_1_12 =    BasicCondition.builder()
 														.setWorkingDir("work3")
 														.setWordExcelName(excel_even_1_12)
 														.setSightwordExcelName(swExcel)
@@ -686,7 +686,7 @@ public class JsonPractice {
 		vocaAppJsonWork(con_even_1_12);
 		*/
 		
-		BasicCondition con_even_13_24 =   BasicCondition.getBuilder()
+		BasicCondition con_even_13_24 =   BasicCondition.builder()
 														.setWorkingDir("work3")
 														.setWordExcelName(excel_even_13_24)
 														.setSightwordExcelName(swExcel)
@@ -700,8 +700,6 @@ public class JsonPractice {
 														.build();
 		
 		vocaAppJsonWork(con_even_13_24);
-		
-		
 		
 //		dummyImgGen();
 	}

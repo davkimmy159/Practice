@@ -26,9 +26,6 @@ public class BasicCondition {
 	List<String> levels;
 	List<String> turns;
 	
-	private static ConditionBuilder builder;
-	private static Object lock = new Object();
-
 	private BasicCondition(ConditionBuilder builder) {
 		this.workingDir = builder.workingDir;
 		this.wordExcelName = builder.wordExcelName;
@@ -44,147 +41,111 @@ public class BasicCondition {
 
 		this.levels = new ArrayList<>(builder.levels);
 		this.turns = new ArrayList<>(builder.turns);
-		
-		builder.workingDir = null;
-		builder.wordExcelName = null;
-		builder.locInfoExcelName = null;
-		builder.interval = 0;
-		builder.lvStart = 0;
-		builder.lvEnd = 0;
-		builder.turnStart = 0;
-		builder.turnEnd = 0;
-		builder.version = null;
-		builder.jsonFileOutput = false;
-		
-		builder.levels = null;
-		builder.turns = null;
 	}
 
-	@EqualsAndHashCode
-	@ToString
-	@AllArgsConstructor
 	public static class ConditionBuilder {
-		@Getter
 		private String workingDir;
-		@Getter
 		private String wordExcelName;
-		@Getter
 		private String sightwordExcelName;
-		@Getter
 		private String locInfoExcelName;
-		@Getter
 		private int interval;
-		@Getter
 		private char lvStart;
-		@Getter
 		private char lvEnd;
-		@Getter
 		private int turnStart;
-		@Getter
 		private int turnEnd;
-		@Getter
 		private String version;
-		@Getter
 		private boolean jsonFileOutput;
 		
-		@Getter
 		private List<String> levels;
-		@Getter
 		private List<String> turns;
 		
 		private ConditionBuilder() {
 		}
 		
 		public BasicCondition build() {
-			builder.setLevels();
-			builder.setTurns();
-			return new BasicCondition(builder);
+			this.setLevels();
+			this.setTurns();
+			return new BasicCondition(this);
 		}
 
 		public ConditionBuilder setWorkingDir(String workingDir) {
 			this.workingDir = workingDir;
-			return builder;
+			return this;
 		}
 
 		public ConditionBuilder setWordExcelName(String wordExcelName) {
 			this.wordExcelName = wordExcelName;
-			return builder;
+			return this;
 		}
 
 		public ConditionBuilder setSightwordExcelName(String sightwordExcelName) {
 			this.sightwordExcelName = sightwordExcelName;
-			return builder;
+			return this;
 		}
 		
 		public ConditionBuilder setLocInfoExcelName(String locInfoExcelName) {
 			this.locInfoExcelName = locInfoExcelName;
-			return builder;
+			return this;
 		}
 
 		public ConditionBuilder setInterval(int interval) {
 			this.interval = interval;
-			return builder;
+			return this;
 		}
 
 		public ConditionBuilder setLvStart(char lvStart) {
 			this.lvStart = lvStart;
-			return builder;
+			return this;
 		}
 		
 		public ConditionBuilder setLvEnd(char lvEnd) {
 			this.lvEnd = lvEnd;
-			return builder;
+			return this;
 		}
 
 		public ConditionBuilder setTurnRange(int turnStart, int turnEnd) {
 			this.turnStart = turnStart;
 			this.turnEnd = turnEnd;
-			return builder;
+			return this;
 		}
 		
 		public ConditionBuilder setVersion(String version) {
 			this.version = version;
-			return builder;
+			return this;
 		}
 		
 		public ConditionBuilder setJsonFileOutput(boolean jsonFileOutput) {
 			this.jsonFileOutput = jsonFileOutput;
-			return builder;
+			return this;
 		}
 		
 		private void setLevels() {
-			levels = new ArrayList<>();
-			interval = interval < 1 || 2 < interval ? 2 : interval;
+			this.levels = new ArrayList<>();
+			this.interval = this.interval < 1 || 2 < this.interval ? 2 : this.interval;
 					
-			if (interval == 2) {
-				for (char lv = lvStart; lv <= 'L'; lv += 2) {
-					levels.add(String.valueOf(lv));
+			if (this.interval == 2) {
+				for (char lv = this.lvStart; lv <= 'L'; lv += 2) {
+					this.levels.add(String.valueOf(lv));
 				}
 			} else {
-				for (char lv = lvStart; lv <= 'L'; lv++) {
-					levels.add(String.valueOf(lv));
+				for (char lv = this.lvStart; lv <= 'L'; lv++) {
+					this.levels.add(String.valueOf(lv));
 				}
 			}
 		}
 		
 		private void setTurns() {
-			turns = new ArrayList<>();
-//			lvStart = lvStart != 'A' && lvStart != 'B' ? 'A' : lvStart;
+			this.turns = new ArrayList<>();
+			this.lvStart = this.lvStart != 'A' && this.lvStart != 'B' ? 'A' : this.lvStart;
 			
-			for (int turn = turnStart; turn <= turnEnd; turn++) {
-				turns.add(String.valueOf(turn));
+			for (int turn = this.turnStart; turn <= this.turnEnd; turn++) {
+				this.turns.add(String.valueOf(turn));
 			}
 		}
 	}
 	
-	public static ConditionBuilder getBuilder() {
-		if (builder == null) {
-			synchronized (lock) {
-				if (builder == null)
-					builder = new ConditionBuilder();
-			}
-		}
-		return builder;
+	public static ConditionBuilder builder() {
+		return new ConditionBuilder();
 	}
 
 	public String getWorkingDir() {
@@ -289,17 +250,5 @@ public class BasicCondition {
 
 	public void setTurns(List<String> turns) {
 		this.turns = turns;
-	}
-
-	public static Object getLock() {
-		return lock;
-	}
-
-	public static void setLock(Object lock) {
-		BasicCondition.lock = lock;
-	}
-
-	public static void setBuilder(ConditionBuilder builder) {
-		BasicCondition.builder = builder;
 	}
 }
